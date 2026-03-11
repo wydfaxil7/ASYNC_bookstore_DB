@@ -1,97 +1,158 @@
-# Async Bookstore API
+# 🛍️ ASYNC Bookstore API
 
-This repository contains an **asynchronous CRUD API** for a bookstore built with **FastAPI**, **SQLAlchemy**, and **SQLite (or any SQL database)**.  
-The API uses **async/await** patterns for high performance, and includes automatic interactive documentation via **Swagger UI**.
+A **high‑performance asynchronous CRUD API** for managing books, built with **FastAPI**, **SQLAlchemy (async)**, and **SQLite** (or any SQL database).  
+Designed for clean structure, professional routing & services, and full API documentation.
 
 ---
 
 ## 🚀 Features
 
-- ✅ FastAPI framework for high‑performance APIs  
-- ✅ Async SQLAlchemy database access  
-- ✅ CRUD (Create, Read, Update, Delete) for books  
-- ✅ Interactive API documentation (`/docs`)  
-- ✅ Professional project structure  
-- 🛠 Ready to switch to PostgreSQL or other databases
+✔ Asynchronous FastAPI endpoints for superior performance  
+✔ Async SQLAlchemy database access  
+✔ Full CRUD operations on books  
+✔ Automatic interactive API documentation (`/docs`)  
+✔ Clear separation of routers, services, repositories & utils  
+✔ Easy to extend, test, and deploy  
 
 ---
 
-## 🗂️ Project Structure
+## 📁 Project Structure
 ASYNC_bookstore_DB/
 ├── app/
-│ ├── database.py # Database connection and session
-│ ├── models.py # SQLAlchemy models
-│ ├── schemas.py # Pydantic schemas
-│ └── routers/
-│ └── books.py # Book CRUD routes
-├── create_tables.py # Script to create DB tables
-├── books.db # SQLite database (ignored on push if in .gitignore)
-├── pyproject.toml # Poetry config
-├── poetry.lock # Dependency lock file
-└── .gitignore # Files to ignore (venv, DB files, etc.)
-
-
----
-
-## 🧠 How It Works
-
-This API handles **bookstore data** with the following endpoints:
-
-| Method | URL | Description |
-|--------|-----|-------------|
-| POST | `/books` | Create a new book |
-| GET | `/books` | Get list of all books |
-| GET | `/books/{id}` | Get a single book |
-| PUT | `/books/{id}` | Update a book |
-| DELETE | `/books/{id}` | Delete a book |
-
-Interactive Swagger docs available at:
-http://127.0.0.1:8000/docs
-
+│   ├── Repository/
+│   │   └── books.py                # Database operations
+│   ├── services/
+│   │   └── books.py                # Business logic
+│   ├── routers/
+│   │   └── books.py                # API routes
+│   ├── utils/
+│   │   └── wrappers.py             # Function wrappers for error handling
+│   ├── database.py                 # Database connection
+│   ├── main.py
+│   ├── models.py                   # SQLAlchemy models
+│   └── schemas.py                  # Pydantic schemas
+├── books.db                        # SQLite database file
+├── tests/                          # Test suite (pytest + httpx)
+│   └── test_books.py
+├── .env                            # Environment variables
+├── .gitignore                      # Ignored files
+├── pyproject.toml                  # Poetry config
+└── README.md                        # Project overview (this file)
 
 ---
 
-## 📦 Installation
+## 📦 Tech Stack
 
-Make sure you have **Python 3.10+** installed.
+| Tool | Purpose |
+|------|---------|
+| **FastAPI** | Web framework for async APIs |
+| **SQLAlchemy** | ORM for working with SQL databases |
+| **SQLite** | Lightweight SQL database (default) |
+| **Poetry** | Dependency & environment management |
+| **Pydantic** | Data validation & serialization |
+| **pytest + httpx** | Testing framework & async http client |
 
-1. Clone the repository:
+---
+
+## 🛠️ Getting Started
+
+### 💻 Requirements
+
+- Python **3.10+**
+- Yarn/Poetry for dependency management
+
+---
+
+### 📥 🏁 Setup
+
+1. **Clone the repository**
 
 ```bash
 git clone https://github.com/wydfaxil7/ASYNC_bookstore_DB.git
 cd ASYNC_bookstore_DB
+```
+2. **Install dependencies with Poetry**
 
-2.Install dependencies using Poetry:
-
+```Bash
 poetry install
-🛠 Set Up Database
+```
 
-Before running the app, create the tables:
+3. **Activate virtual environment**
 
-poetry run python create_tables.py
+```Bash
+poetry shell
+```
 
-Run the API Server
-poetry run uvicorn app.main:app --reload
+4. Create database tables
 
-The server will start on:
+This will populate your books.db SQLite file:
+
+```Bash
+python create_tables.py
+```
+
+🚀 Run the API
+
+Start the FastAPI server:
+
+```Bash
+uvicorn app.main:app --reload
+```
+
+The server will run at:
 
 http://127.0.0.1:8000
+
 📘 API Documentation
 
-Visit:
+FastAPI auto‑generates interactive docs:
 
+Swagger UI:
 http://127.0.0.1:8000/docs
 
-This provides an interactive UI to test all endpoints using Swagger.
+ReDoc:
+http://127.0.0.1:8000/redoc
 
-🐍 Tech Stack
+These UIs let you explore and test all endpoints easily.
 
-FastAPI — High‑performance web framework for Python
+📌 Available Endpoints
+Method         Path	              Description
+POST	        /books	           Create a new book
+GET	          /books	           Get all books
+GET         	/books/{id}      	 Get a single book
+PUT         	/books/{id}	       Update a book
+DELETE	      /books/{id}	       Delete a book
 
-SQLAlchemy — Database ORM
+🧪 Tests
 
-SQLite — Lightweight SQL database (changeable to PostgreSQL)
+Tests use pytest, pytest‑asyncio, and httpx for async testing.
 
-Poetry — Dependency management
+Run tests with:
 
-Pydantic — Data validation and serialization
+```Bash
+python -m pytest -v
+```
+Or simply:
+```Bash
+pytest -v
+```
+🧩 Error Handling
+
+This project uses function wrappers to catch errors centrally and return consistent HTTP error responses.
+Errors like 404 (not found) or unexpected server errors will be formatted by these wrappers.
+
+⭐ Contributions
+
+Contributions are welcome! Feel free to add features, documentation, or test improvements.
+
+Fork the repository
+
+Create a new branch (feature/your-feature)
+
+Commit your changes
+
+Open a pull request
+
+
+
+*Thanks for checking out ASYNC Bookstore API!* 🚀
