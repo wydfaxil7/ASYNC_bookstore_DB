@@ -92,7 +92,7 @@ This will populate your books.db SQLite file:
 python create_tables.py
 ```
 
-🚀 Run the API
+### 🚀 Run the API
 
 Start the FastAPI server:
 
@@ -104,7 +104,7 @@ The server will run at:
 
 http://127.0.0.1:8000
 
-📘 API Documentation
+### 📘 API Documentation
 
 FastAPI auto‑generates interactive docs:
 
@@ -116,7 +116,7 @@ http://127.0.0.1:8000/redoc
 
 These UIs let you explore and test all endpoints easily.
 
-📌 Available Endpoints
+### 📌 Available Endpoints
 
 | Method | Path         | Description          |
 |--------|--------------|--------------------|
@@ -126,7 +126,7 @@ These UIs let you explore and test all endpoints easily.
 | PUT    | /books/{id}  | Update a book      |
 | DELETE | /books/{id}  | Delete a book      |
 
-🧪 Tests
+## 🧪 Tests
 
 Tests use pytest, pytest‑asyncio, and httpx for async testing.
 
@@ -139,12 +139,12 @@ Or simply:
 ```Bash
 pytest -v
 ```
-🧩 Error Handling
+### 🧩 Error Handling
 
 This project uses function wrappers to catch errors centrally and return consistent HTTP error responses.
 Errors like 404 (not found) or unexpected server errors will be formatted by these wrappers.
 
-⭐ Contributions
+## ⭐ Contributions
 
 Contributions are welcome! Feel free to add features, documentation, or test improvements.
 
