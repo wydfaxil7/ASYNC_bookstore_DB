@@ -46,12 +46,12 @@ ASYNC_bookstore_DB/
 
 | Tool | Purpose |
 |------|---------|
-| **FastAPI** | Web framework for async APIs |
-| **SQLAlchemy** | ORM for working with SQL databases |
-| **SQLite** | Lightweight SQL database (default) |
-| **Poetry** | Dependency & environment management |
-| **Pydantic** | Data validation & serialization |
-| **pytest + httpx** | Testing framework & async http client |
+| **FastAPI**       | Web framework for async APIs |
+| **SQLAlchemy**    | ORM for working with SQL databases (PostgreSQL) |
+| **PostgreSQL**    | Primary SQL database |
+| **Poetry**        | Dependency & environment management |
+| **Pydantic**      | Data validation & serialization |
+| **pytest + httpx**| Testing framework & async HTTP client |
 
 ---
 
