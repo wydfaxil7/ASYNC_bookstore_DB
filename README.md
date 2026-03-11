@@ -1,6 +1,6 @@
 # 🛍️ ASYNC Bookstore API
 
-A **high‑performance asynchronous CRUD API** for managing books, built with **FastAPI**, **SQLAlchemy (async)**, and **SQLite** (or any SQL database).  
+A **high‑performance asynchronous CRUD API** for managing books, built with **FastAPI**, **SQLAlchemy (async)**, and **PostgreSQL**.  
 Designed for clean structure, professional routing & services, and full API documentation.
 
 ---
@@ -97,7 +97,7 @@ python create_tables.py
 Start the FastAPI server:
 
 ```Bash
-uvicorn app.main:app --reload
+poetry uvicorn app.main:app --reload
 ```
 
 The server will run at:
