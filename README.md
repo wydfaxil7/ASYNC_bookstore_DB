@@ -17,6 +17,7 @@ Designed for clean structure, professional routing & services, and full API docu
 ---
 
 ## 📁 Project Structure
+```STRUCTURE
 ASYNC_bookstore_DB/
 ├── app/
 │   ├── Repository/
@@ -38,7 +39,7 @@ ASYNC_bookstore_DB/
 ├── .gitignore                      # Ignored files
 ├── pyproject.toml                  # Poetry config
 └── README.md                        # Project overview (this file)
-
+```
 ---
 
 ## 📦 Tech Stack
@@ -116,12 +117,14 @@ http://127.0.0.1:8000/redoc
 These UIs let you explore and test all endpoints easily.
 
 📌 Available Endpoints
-Method         Path	              Description
-POST	        /books	           Create a new book
-GET	          /books	           Get all books
-GET         	/books/{id}      	 Get a single book
-PUT         	/books/{id}	       Update a book
-DELETE	      /books/{id}	       Delete a book
+
+| Method | Path         | Description          |
+|--------|--------------|--------------------|
+| POST   | /books       | Create a new book  |
+| GET    | /books       | Get all books      |
+| GET    | /books/{id}  | Get a single book  |
+| PUT    | /books/{id}  | Update a book      |
+| DELETE | /books/{id}  | Delete a book      |
 
 🧪 Tests
 
