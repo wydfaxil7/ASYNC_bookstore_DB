@@ -108,14 +108,17 @@ http://127.0.0.1:8000
 ---
 
 ## 📌 Endpoints
-📚 Books
-Method	Endpoint	Description
-POST	/books	Create a book
-POST	/books/bulk	Bulk create books
-GET	/books	Get books (with filtering & pagination)
-GET	/books/{id}	Get a single book
-PUT	/books/{id}	Update a book
-DELETE	/books/{id}	Delete a book
+
+### 📚 Books
+
+| Method | Endpoint        | Description                          |
+|:------:|----------------|--------------------------------------|
+| POST   | `/books`       | Create a new book                    |
+| POST   | `/books/bulk`  | Bulk create multiple books           |
+| GET    | `/books`       | Get books (filtering & pagination)   |
+| GET    | `/books/{id}`  | Get a single book by ID              |
+| PUT    | `/books/{id}`  | Update a book                        |
+| DELETE | `/books/{id}`  | Delete a book                        |
 
 ---
 
