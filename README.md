@@ -147,15 +147,24 @@ http://127.0.0.1:8000
 
 ## ⚡ Bulk Insert Example
 ```bash
-[
-  {
-    "name": "Atomic Habits",
-    "author": "James Clear",
-    "genre": "Self-help",
-    "published_date": "2018-10-16",
-    "description": "A guide to building good habits."
-  }
-]
+{
+  "books": [
+    {
+      "name": "string 1",
+      "author": "string",
+      "genre": "string",
+      "published_date": "2026-03-26",
+      "description": "string"
+    },
+    {
+      "name": "string 2",
+      "author": "string",
+      "genre": "string",
+      "published_date": "2026-03-26",
+      "description": "string"
+    }
+  ]
+}
 ```
 ---
 
