@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from app import schemas
+from datetime import date
 from app.database import get_db
 from app.services import books as services
 
@@ -13,14 +14,41 @@ async def create_book(book: schemas.BookCreate, db: AsyncSession = Depends(get_d
     """
     Creates a new book
     """
-    return await services.create_book_service(db, book.dict())
+    return await services.create_book_service(db, book.model_dump())
 
-@router.get("/books", response_model=List[schemas.BookResponse])
-async def get_books(db: AsyncSession = Depends(get_db)):
+@router.post("/books/bulk", response_model=List[schemas.BookResponse])
+async def create_bulk_books(payload :schemas.BookBulkCreate,
+                            db: AsyncSession = Depends(get_db)):
+    """
+    Create books in bulk
+    """
+    return await services.create_bulk_books_service(db, [book.model_dump() for book in payload.books])
+
+@router.get("/books", response_model=schemas.BookListResponse)
+async def get_books(limit: int = 10,
+                    offset: int = 0,
+                    author: str | None = None,
+                    genre: str | None = None,
+                    start_date: date | None = None,
+                    end_date: date | None= None,
+                    db: AsyncSession = Depends(get_db)):
     """
     Fetche all books
     """
-    return await services.get_books_service(db)
+    return await services.get_books_service(db, limit, offset, author, genre, start_date, end_date)
+
+@router.get("/books/search", response_model = List[schemas.BookResponse])
+async def search_book(
+    q: str | None = None,
+    genre: str | None = None,
+    limit: int = 10,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Search book by title/author and filter by genre
+    """
+    return await services.search_book_service(db, q, genre, limit, offset)
 
 @router.get("/books/{book_id}", response_model=schemas.BookResponse)
 async def get_book(book_id: int, db: AsyncSession = Depends(get_db)):
@@ -34,7 +62,7 @@ async def update_book(book_id: int, book: schemas.BookUpdate, db: AsyncSession =
     """
     Updates an existing book
     """
-    return await services.update_book_service(db, book_id, book.dict())
+    return await services.update_book_service(db, book_id, book.model_dump())
 
 @router.delete("/books/{book_id}")
 async def delete_book(book_id: int, db: AsyncSession = Depends(get_db)):
@@ -50,3 +78,4 @@ async def delete_book(book_id: int, db: AsyncSession = Depends(get_db)):
     
 #     # This will fail because 'non_existent_book_id' is negative and will not be found
 #     return await services.get_book_service(db, book_id=-1)
+

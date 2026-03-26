@@ -1,6 +1,7 @@
 # schemas.py
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
+from typing import List
 
 class BookBase(BaseModel):
     name: str
@@ -19,5 +20,16 @@ class BookUpdate(BookBase):
 class BookResponse(BookBase):
     id: int
 
-    class Config:
-        model_config = {"from_attributes": True}  # replaces orm_mode
+    model_config = ConfigDict(from_attributes = True)
+
+class BookListResponse(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    data: List["BookResponse"]  # List of books
+    message: str | None = None  # optional message
+
+    model_config = ConfigDict(from_attributes = True)
+
+class BookBulkCreate(BaseModel):
+    books: List[BookCreate]
