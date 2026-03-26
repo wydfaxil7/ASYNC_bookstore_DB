@@ -88,7 +88,7 @@ DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/bookstore
 python create_tables.py
 ```
 
-###🚀 Run the API
+### 🚀 Run the API
 ```bash
 poetry run uvicorn app.main:app --reload
 ```
