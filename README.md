@@ -188,17 +188,18 @@ Handles:
 ---
 
 ## 🔮 Future Improvements
-🔃 Sorting (sort_by, order)
-🔐 Authentication & authorization
-🔍 Full-text search
-🐳 Docker support
-⚙️ CI/CD pipeline
-🤝 Contributions
+- 🔃 Sorting (sort_by, order)
+- 🔐 Authentication & authorization
+- 🔍 Full-text search
+- 🐳 Docker support
+- ⚙️ CI/CD pipeline
+- 🤝 Contributions
+---
+## Contributions are welcome!
 
-Contributions are welcome!
-
-# Fork → Create branch → Commit → PR 🚀
-⭐ Final Note
+### Fork → Create branch → Commit → PR 🚀
+---
+# ⭐ Final Note
 
 This project demonstrates a production-ready backend structure using modern async Python tools.
 
