@@ -178,12 +178,12 @@ Handles:
 ---
 
 ## 💡 Key Learnings
-Async FastAPI architecture
-SQLAlchemy async queries
-Clean backend layering
-Pagination & filtering patterns
-Bulk data handling
-Pydantic v2 migration
+- Async FastAPI architecture
+- SQLAlchemy async queries
+- Clean backend layering
+- Pagination & filtering patterns
+- Bulk data handling
+- Pydantic v2 migration
 
 ---
 
