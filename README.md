@@ -1,161 +1,205 @@
 # 🛍️ ASYNC Bookstore API
 
-A **high‑performance asynchronous CRUD API** for managing books, built with **FastAPI**, **SQLAlchemy (async)**, and **PostgreSQL**.  
-Designed for clean structure, professional routing & services, and full API documentation.
+> A high-performance asynchronous Bookstore API built with **FastAPI, Async SQLAlchemy, and PostgreSQL**.
+
+Designed with a **clean layered architecture** to ensure scalability, maintainability, and production-readiness.
 
 ---
 
 ## 🚀 Features
 
-✔ Asynchronous FastAPI endpoints for superior performance  
-✔ Async SQLAlchemy database access  
-✔ Full CRUD operations on books  
-✔ Automatic interactive API documentation (`/docs`)  
-✔ Clear separation of routers, services, repositories & utils  
-✔ Easy to extend, test, and deploy  
+- ⚡ Fully asynchronous FastAPI endpoints  
+- 🗄️ Async SQLAlchemy with PostgreSQL  
+- 🧱 Clean architecture (Router → Service → Repository)  
+- 📚 Full CRUD operations on books  
+- 📄 Pagination with total count (`limit`, `offset`)  
+- 🔍 Dynamic filtering:
+  - Filter by **author**
+  - Filter by **genre**
+  - Filter by **published date range**
+- 📦 Bulk book creation endpoint  
+- 🧠 Pydantic v2 schemas (`model_dump`, `from_attributes`)  
+- 🛡️ Centralized error handling using wrappers  
+- 📘 Auto-generated API docs (Swagger & ReDoc)  
 
 ---
 
 ## 📁 Project Structure
-```STRUCTURE
+
+```bash
 ASYNC_bookstore_DB/
 ├── app/
 │   ├── Repository/
-│   │   └── books.py                # Database operations
+│   │   └── books.py
 │   ├── services/
-│   │   └── books.py                # Business logic
+│   │   └── books.py
 │   ├── routers/
-│   │   └── books.py                # API routes
+│   │   └── books.py
 │   ├── utils/
-│   │   └── wrappers.py             # Function wrappers for error handling
-│   ├── database.py                 # Database connection
-│   ├── main.py
-│   ├── models.py                   # SQLAlchemy models
-│   └── schemas.py                  # Pydantic schemas
-├── books.db                        # SQLite database file
-├── tests/                          # Test suite (pytest + httpx)
-│   └── test_books.py
-├── .env                            # Environment variables
-├── .gitignore                      # Ignored files
-├── pyproject.toml                  # Poetry config
-└── README.md                        # Project overview (this file)
+│   │   └── wrappers.py
+│   ├── database.py
+│   ├── models.py
+│   ├── schemas.py
+│   └── main.py
+├── tests/
+├── .env
+├── pyproject.toml
+└── README.md
 ```
----
 
+---
 ## 📦 Tech Stack
 
-| Tool | Purpose |
-|------|---------|
-| **FastAPI**       | Web framework for async APIs |
-| **SQLAlchemy**    | ORM for working with SQL databases (PostgreSQL) |
-| **PostgreSQL**    | Primary SQL database |
-| **Poetry**        | Dependency & environment management |
-| **Pydantic**      | Data validation & serialization |
-| **pytest + httpx**| Testing framework & async HTTP client |
+| Tech            | Usage |
+|-----------------|------|
+| FastAPI         | Async web framework |
+| SQLAlchemy      | Async ORM |
+| PostgreSQL      | Database |
+| Pydantic v2     | Validation & serialization |
+| Poetry          | Dependency management |
+| pytest + httpx  | Testing |
 
 ---
 
-## 🛠️ Getting Started
+# 🛠️ Getting Started
 
-### 💻 Requirements
-
-- Python **3.10+**
-- Yarn/Poetry for dependency management
-
----
-
-### 📥 🏁 Setup
-
-1. **Clone the repository**
+## 📥 Clone Repository
 
 ```bash
 git clone https://github.com/wydfaxil7/ASYNC_bookstore_DB.git
 cd ASYNC_bookstore_DB
 ```
-2. **Install dependencies with Poetry**
-
-```Bash
+## 📦 Install Dependencies
+```bash
 poetry install
-```
-
-3. **Activate virtual environment**
-
-```Bash
 poetry shell
 ```
+---
 
-4. Create database tables
+## ⚙️ Environment Variables
 
-This will populate your books.db SQLite file:
+### Create a .env file:
+```bash
+DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/bookstore
+```
 
-```Bash
+### 🗄️ Create Database Tables
+```bash
 python create_tables.py
 ```
 
-### 🚀 Run the API
-
-Start the FastAPI server:
-
-```Bash
-poetry uvicorn app.main:app --reload
+###🚀 Run the API
+```bash
+poetry run uvicorn app.main:app --reload
 ```
+---
 
-The server will run at:
-
+## 🔗 Server 
+```bash
 http://127.0.0.1:8000
+```
+---
 
 ### 📘 API Documentation
-
-FastAPI auto‑generates interactive docs:
-
-Swagger UI:
-http://127.0.0.1:8000/docs
-
-ReDoc:
-http://127.0.0.1:8000/redoc
-
-These UIs let you explore and test all endpoints easily.
-
-### 📌 Available Endpoints
-
-| Method | Path         | Description          |
-|--------|--------------|--------------------|
-| POST   | /books       | Create a new book  |
-| GET    | /books       | Get all books      |
-| GET    | /books/{id}  | Get a single book  |
-| PUT    | /books/{id}  | Update a book      |
-| DELETE | /books/{id}  | Delete a book      |
-
-## 🧪 Tests
-
-Tests use pytest, pytest‑asyncio, and httpx for async testing.
-
-Run tests with:
-
-```Bash
-python -m pytest -v
+```bash
+📄 Swagger UI → http://127.0.0.1:8000/docs
+📕 ReDoc → http://127.0.0.1:8000/redoc
 ```
-Or simply:
-```Bash
+---
+
+## 📌 Endpoints
+📚 Books
+Method	Endpoint	Description
+POST	/books	Create a book
+POST	/books/bulk	Bulk create books
+GET	/books	Get books (with filtering & pagination)
+GET	/books/{id}	Get a single book
+PUT	/books/{id}	Update a book
+DELETE	/books/{id}	Delete a book
+
+---
+
+## 🔍 Filtering & Pagination
+### Pagination
+```bash
+/books?limit=10&offset=0
+```
+### Filter by Author
+```bash
+/books?author=Rowling
+```
+### Filter by Genre
+```bash
+/books?genre=Fantasy
+```
+### Filter by Date Range
+```bash
+/books?start_date=2000-01-01&end_date=2020-01-01
+```
+### Combined Filters
+```bash
+/books?author=John&genre=Fiction&limit=5&offset=0
+```
+---
+
+## ⚡ Bulk Insert Example
+```bash
+[
+  {
+    "name": "Atomic Habits",
+    "author": "James Clear",
+    "genre": "Self-help",
+    "published_date": "2018-10-16",
+    "description": "A guide to building good habits."
+  }
+]
+```
+---
+
+## 🧪 Running Tests
+```bash
 pytest -v
 ```
-### 🧩 Error Handling
+---
 
-This project uses function wrappers to catch errors centrally and return consistent HTTP error responses.
-Errors like 404 (not found) or unexpected server errors will be formatted by these wrappers.
+## 🧩 Error Handling
+Centralized using service wrappers
+Consistent API responses
 
-## ⭐ Contributions
+Handles:
 
-Contributions are welcome! Feel free to add features, documentation, or test improvements.
+❌ 404 Not Found
+⚠️ 400 Bad Request
+💥 500 Internal Errors
 
-Fork the repository
+---
 
-Create a new branch (feature/your-feature)
+## 💡 Key Learnings
+Async FastAPI architecture
+SQLAlchemy async queries
+Clean backend layering
+Pagination & filtering patterns
+Bulk data handling
+Pydantic v2 migration
 
-Commit your changes
+---
 
-Open a pull request
+## 🔮 Future Improvements
+🔃 Sorting (sort_by, order)
+🔐 Authentication & authorization
+🔍 Full-text search
+🐳 Docker support
+⚙️ CI/CD pipeline
+🤝 Contributions
 
+Contributions are welcome!
 
+# Fork → Create branch → Commit → PR 🚀
+⭐ Final Note
 
-*Thanks for checking out ASYNC Bookstore API!* 🚀
+This project demonstrates a production-ready backend structure using modern async Python tools.
+
+🚀 Built with passion using FastAPI
+
+---
+
