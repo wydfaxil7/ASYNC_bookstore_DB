@@ -1,6 +1,8 @@
 from functools import wraps
 from fastapi import HTTPException
 import logging
+import traceback
+
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +17,7 @@ def serv_wrapper(func):
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"Error in {func.__name__}: {str(e)}")
-            raise HTTPException(status_code=500, detail="Internal Server ERROR!!")
+            print("🔥 ERROR:", str(e))
+            traceback.print_exc()   # 👈 VERY IMPORTANT
+            raise HTTPException(status_code=500, detail=str(e))  # show actual error
     return wrapper

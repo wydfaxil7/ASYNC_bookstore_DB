@@ -33,3 +33,6 @@ class BookListResponse(BaseModel):
 
 class BookBulkCreate(BaseModel):
     books: List[BookCreate]
+
+class AuthorResponse(BaseModel):
+    author: str

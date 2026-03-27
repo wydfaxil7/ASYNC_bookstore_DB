@@ -7,6 +7,8 @@ from app.models import Book
 from app.utils.wrappers import serv_wrapper
 from app.schemas import BookListResponse, BookResponse
 
+from app.services import ai as ai_service
+
 @serv_wrapper
 async def create_book_service(db: AsyncSession, book_data: dict) -> Book:
     """
@@ -96,3 +98,24 @@ async def search_book_service(db: AsyncSession,
         raise HTTPException(status_code=400, detail="Limit too large (max 100)")
 
     return await repo.search_book(db, q, genre, limit, offset)
+
+@serv_wrapper
+async def ai_search_book_service(db: AsyncSession, query: str, limit: str, offset:str):
+    """
+    Handles searching books with GROQ API
+    """
+    if limit > 100:
+        raise HTTPException(status_code=400, detail="Limit too large")
+    
+    books, total = await ai_service.ai_search_service(db, query, limit, offset)
+
+    books_data = [BookResponse.model_validate(book) for book in books]
+
+    return BookListResponse(
+        total = total, 
+        limit = limit,
+        offset = offset,
+        data = books_data,
+        message = "No Data found" if not books_data else "AI search successful"
+    )
+

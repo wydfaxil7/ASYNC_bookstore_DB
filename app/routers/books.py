@@ -6,6 +6,9 @@ from app import schemas
 from datetime import date
 from app.database import get_db
 from app.services import books as services
+from app.services.ai import ai_search_service
+from app.services.ai_prompts import build_search_prompt
+from app.schemas import BookListResponse, AuthorResponse
 
 router = APIRouter()
 
@@ -50,6 +53,34 @@ async def search_book(
     """
     return await services.search_book_service(db, q, genre, limit, offset)
 
+@router.get("/books/ai-search", response_model=schemas.BookListResponse)
+async def ai_search_books(
+    query: str,
+    limit: int = 10,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Natural Language Search using AI
+    """
+    result = await ai_search_service(db, query, limit, offset)
+
+    # If result is dict → it's an author-only response
+    if isinstance(result, dict):
+        return result  # {"author": "Mark Manson"}
+
+    # Otherwise, it's list of books
+    books, total = result
+    books_data = [schemas.BookResponse.model_validate(book) for book in books]
+
+    return schemas.BookListResponse(
+        total=total,
+        limit=limit,
+        offset=offset,
+        data=books_data,
+        message="Books fetched successfully" if books_data else "No data found"
+    )
+
 @router.get("/books/{book_id}", response_model=schemas.BookResponse)
 async def get_book(book_id: int, db: AsyncSession = Depends(get_db)):
     """
@@ -70,6 +101,8 @@ async def delete_book(book_id: int, db: AsyncSession = Depends(get_db)):
     Delete a book by its ID
     """
     return await services.delete_book_service(db, book_id)
+
+
 
 # """TESTING WRAPPERS"""
 # @router.get("/test-error")
