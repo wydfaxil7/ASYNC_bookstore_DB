@@ -136,7 +136,7 @@ async def get_books_with_filters(db: AsyncSession,
 
     # Genre filter
     if genre: 
-        filters.append(Book.genre == genre)
+        filters.append(Book.genre.ilike(f"%{genre}%"))
 
     # Start-Date filter
     if start_date:
@@ -148,8 +148,23 @@ async def get_books_with_filters(db: AsyncSession,
 
     # This will apply filter if any exists
     if filters:
-        query = query.where(and_(*filters))
-        count_query = count_query.where(and_(*filters))
+        if author or genre:
+            query = query.where(
+                or_(
+                    Book.author.ilike(f"%{author}%"),
+                    Book.genre.ilike(f"%{genre}%")
+                )
+            )
+            count_query = count_query.where(
+                or_(
+                    Book.author.ilike(f"%{author}%"),
+                    Book.genre.ilike(f"%{genre}%")
+                )
+            )
+        elif filters:
+            query = query.where(and_(*filters))
+            count_query = count_query.where(and_(*filters))
+
 
     # Total count
     total_result = await db.execute(count_query)
@@ -161,4 +176,73 @@ async def get_books_with_filters(db: AsyncSession,
 
     books = result.scalars().all()
 
+    return books, total
+
+
+async def search_books_by_keywords(
+    db: AsyncSession,
+    keywords: list[str],
+    limit: int = 10,
+    offset: int = 0,
+    author: str | None = None,
+    genre: str | None = None
+) -> tuple[list[Book], int]:
+    """
+    Search books by keywords in description and title, with optional filters.
+    Used by recommendation system for more accurate matching.
+    
+    Args:
+        db: Database session
+        keywords: List of keywords to search for
+        limit: Results per page
+        offset: Pagination offset
+        author: Optional author filter
+        genre: Optional genre filter
+    
+    Returns:
+        Tuple of (books list, total count)
+    """
+    if not keywords:
+        return [], 0
+    
+    query = select(Book)
+    count_query = select(func.count()).select_from(Book)
+    filters = []
+    
+    # Add keyword filters (OR conditions - match any keyword)
+    keyword_filters = []
+    for keyword in keywords:
+        search_term = f"%{keyword.strip()}%"
+        keyword_filters.append(
+            or_(
+                Book.name.ilike(search_term),
+                Book.description.ilike(search_term)
+            )
+        )
+    
+    if keyword_filters:
+        filters.append(or_(*keyword_filters))
+    
+    # Add author filter if provided
+    if author:
+        filters.append(Book.author.ilike(f"%{author}%"))
+    
+    # Add genre filter if provided
+    if genre:
+        filters.append(Book.genre.ilike(f"%{genre}%"))
+    
+    # Apply all filters with AND logic
+    if filters:
+        query = query.where(and_(*filters))
+        count_query = count_query.where(and_(*filters))
+    
+    # Get total count
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+    
+    # Get paginated results
+    query = query.limit(limit).offset(offset)
+    result = await db.execute(query)
+    books = result.scalars().all()
+    
     return books, total

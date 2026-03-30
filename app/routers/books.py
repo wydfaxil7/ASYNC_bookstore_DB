@@ -1,14 +1,15 @@
 #app/routers/books.py
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from app import schemas
 from datetime import date
 from app.database import get_db
 from app.services import books as services
-from app.services.ai import ai_search_service
+from app.services.ai import ai_search_service, ai_recommend_book_service
 from app.services.ai_prompts import build_search_prompt
-from app.schemas import BookListResponse, AuthorResponse
+from app.schemas import BookListResponse, AuthorResponse, BookSummaryResponse
+
 
 router = APIRouter()
 
@@ -53,7 +54,7 @@ async def search_book(
     """
     return await services.search_book_service(db, q, genre, limit, offset)
 
-@router.get("/books/ai-search", response_model=schemas.BookListResponse)
+@router.get("/books/ai-search", response_model=schemas.AISearchResponse)
 async def ai_search_books(
     query: str,
     limit: int = 10,
@@ -65,20 +66,33 @@ async def ai_search_books(
     """
     result = await ai_search_service(db, query, limit, offset)
 
-    # If result is dict → it's an author-only response
-    if isinstance(result, dict):
-        return result  # {"author": "Mark Manson"}
+    # Convert ORM → Pydantic if books exist
+    if result.get("data"):
+        result["data"] = [
+            schemas.BookResponse.model_validate(book)
+            for book in result["data"]
+        ]
+    
+    return result
 
-    # Otherwise, it's list of books
-    books, total = result
-    books_data = [schemas.BookResponse.model_validate(book) for book in books]
-
+@router.get("/books/recommendations", response_model=schemas.BookListResponse)
+async def ai_recommend_books(
+    title: str,
+    limit: int = 5,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get AI-based recommendations fom the DB
+    """
+    result = await ai_recommend_book_service(db, title, limit, offset)
+    books_data = [schemas.BookResponse.model_validate(book) for book in result["data"]]
     return schemas.BookListResponse(
-        total=total,
-        limit=limit,
-        offset=offset,
-        data=books_data,
-        message="Books fetched successfully" if books_data else "No data found"
+        total = result["total"],
+        limit = result["limit"],
+        offset = result["offset"],
+        data = books_data,
+        message = result["message"]
     )
 
 @router.get("/books/{book_id}", response_model=schemas.BookResponse)
@@ -101,6 +115,38 @@ async def delete_book(book_id: int, db: AsyncSession = Depends(get_db)):
     Delete a book by its ID
     """
     return await services.delete_book_service(db, book_id)
+
+# @router.get("/books/{book_id}/summary", response_model=BookSummaryResponse)
+# async def get_book_summary(
+#     book_id: int,
+#     db: AsyncSession = Depends(get_db)
+# ):
+#     """
+#     Generate a story-like summary of a book using AI.
+#
+#     Uses the book's description and metadata to create an engaging summary.
+#     """
+#     return await services.get_book_summary_service(db, book_id)
+
+
+@router.get("/books/summary/search", response_model=BookSummaryResponse)
+async def get_book_summary(
+    id: int = Query(None, description="Book ID to get summary for"),
+    name: str = Query(None, description="Book name to search for (partial matching supported)"),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Generate a story-like summary of a book using AI.
+    
+    Can search by either book ID or book name. If both are provided, ID takes precedence.
+    Uses the book's description and metadata to create an engaging summary.
+    """
+    if id is not None:
+        return await services.get_book_summary_service(db, id)
+    elif name is not None:
+        return await services.get_book_summary_by_name_service(db, name)
+    else:
+        raise HTTPException(status_code=400, detail="Either 'id' or 'name' parameter must be provided")
 
 
 

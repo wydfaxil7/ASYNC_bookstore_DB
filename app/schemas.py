@@ -36,3 +36,18 @@ class BookBulkCreate(BaseModel):
 
 class AuthorResponse(BaseModel):
     author: str
+
+class AISearchResponse(BaseModel):
+    intent: str
+    author: str | None = None
+    total: int | None = None
+    limit: int | None = None
+    offset: int | None = None
+    data: List[BookResponse] | None = None
+    message: str | None = None
+
+class BookSummaryResponse(BaseModel):
+    book_id: int
+    name: str
+    author: str
+    summary: str
