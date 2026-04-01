@@ -2,7 +2,7 @@
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Book
-from sqlalchemy import or_, func, and_
+from sqlalchemy import or_, func, and_, asc, desc
 from datetime import date
 
 from typing import List
@@ -120,9 +120,11 @@ async def get_books_with_filters(db: AsyncSession,
                                  author: str | None = None,
                                  genre: str | None = None,
                                  start_date: date | None = None,
-                                 end_date: date | None = None):
+                                 end_date: date | None = None,
+                                 sort_by: str = "published_date",
+                                 order: str = "desc"):
     """
-    Fetch books with dynamic filters and total count
+    Fetch books with dynamic filters, sorting and total count
     """
 
     query = select(Book)
@@ -146,25 +148,24 @@ async def get_books_with_filters(db: AsyncSession,
     if end_date:
         filters.append(Book.published_date <= end_date)
 
-    # This will apply filter if any exists
+    # Apply filters if any exist
     if filters:
-        if author or genre:
-            query = query.where(
-                or_(
-                    Book.author.ilike(f"%{author}%"),
-                    Book.genre.ilike(f"%{genre}%")
-                )
-            )
-            count_query = count_query.where(
-                or_(
-                    Book.author.ilike(f"%{author}%"),
-                    Book.genre.ilike(f"%{genre}%")
-                )
-            )
-        elif filters:
-            query = query.where(and_(*filters))
-            count_query = count_query.where(and_(*filters))
+        query = query.where(and_(*filters))
+        count_query = count_query.where(and_(*filters))
 
+    # Apply sorting
+    column_map = {
+        "name": Book.name,
+        "author": Book.author,
+        "published_date": Book.published_date,
+        "genre": Book.genre
+    }
+    
+    sort_column = column_map.get(sort_by, Book.published_date)
+    if order == "desc":
+        query = query.order_by(desc(sort_column))
+    else:
+        query = query.order_by(asc(sort_column))
 
     # Total count
     total_result = await db.execute(count_query)

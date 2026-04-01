@@ -34,6 +34,16 @@ class BookListResponse(BaseModel):
 class BookBulkCreate(BaseModel):
     books: List[BookCreate]
 
+class BookQueryParams(BaseModel):
+    limit: int = 10
+    offset: int = 0
+    author: str | None = None
+    genre: str | None = None
+    start_date: str | None = None
+    end_date: str | None = None
+    sort_by: str | None = None
+    order: str | None = None
+
 class AuthorResponse(BaseModel):
     author: str
 
