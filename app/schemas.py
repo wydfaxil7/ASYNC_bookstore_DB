@@ -1,6 +1,6 @@
 # schemas.py
-from pydantic import BaseModel, ConfigDict
-from datetime import date
+from pydantic import BaseModel, ConfigDict, EmailStr
+from datetime import date, datetime
 from typing import List
 
 class BookBase(BaseModel):
@@ -61,3 +61,32 @@ class BookSummaryResponse(BaseModel):
     name: str
     author: str
     summary: str
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+
+class UserRead(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    is_active: bool
+    is_admin: bool
+
+    model_config = ConfigDict(from_attributes = True)
+
+class UserLogin(BaseModel):
+    username: str | None = None
+    email: EmailStr | None = None
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+class TokenData(BaseModel): 
+    user_id: int | None = None
+    username: str | None = None
+    is_admin: bool | None = None
+    exp: datetime | None = None
