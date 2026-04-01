@@ -17,11 +17,11 @@ async def create_book(db: AsyncSession, book_data: dict) -> Book:
     await db.refresh(db_book)
     return db_book
 
-async def create_bulk_books(db: AsyncSession, books_date: List[dict]):
+async def create_bulk_books(db: AsyncSession, books_data: List[dict]):
     """
     Inserts books in bulk
     """
-    db_books = [Book(**book) for book in books_date]
+    db_books = [Book(**book) for book in books_data]
 
     db.add_all(db_books)
     await db.commit()
