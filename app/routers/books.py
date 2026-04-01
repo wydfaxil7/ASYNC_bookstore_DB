@@ -9,12 +9,17 @@ from app.services import books as services
 from app.services.ai import ai_search_service, ai_recommend_book_service
 from app.services.ai_prompts import build_search_prompt
 from app.schemas import BookListResponse, AuthorResponse, BookSummaryResponse
+from app.dependencies.auth_dependencies import require_admin, get_current_user
+from fastapi import HTTPException, status
 
 
 router = APIRouter()
 
 @router.post("/books", response_model=schemas.BookResponse)
-async def create_book(book: schemas.BookCreate, db: AsyncSession = Depends(get_db)):
+async def create_book(book: schemas.BookCreate, 
+                      db: AsyncSession = Depends(get_db),
+                      current_user = Depends(get_current_user)
+                      ):
     """
     Creates a new book
     """
@@ -105,14 +110,21 @@ async def get_book(book_id: int, db: AsyncSession = Depends(get_db)):
     return await services.get_book_service(db, book_id)
 
 @router.put("/books/{book_id}", response_model=schemas.BookResponse)
-async def update_book(book_id: int, book: schemas.BookUpdate, db: AsyncSession = Depends(get_db)):
+async def update_book(book_id: int, 
+                      book: schemas.BookUpdate, 
+                      db: AsyncSession = Depends(get_db),
+                      current_user = Depends(get_current_user)
+                      ):
     """
     Updates an existing book
     """
     return await services.update_book_service(db, book_id, book.model_dump())
 
 @router.delete("/books/{book_id}")
-async def delete_book(book_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_book(book_id: int, 
+                      db: AsyncSession = Depends(get_db),
+                      admin = Depends(require_admin),
+                      ):
     """
     Delete a book by its ID
     """
@@ -150,6 +162,15 @@ async def get_book_summary(
     else:
         raise HTTPException(status_code=400, detail="Either 'id' or 'name' parameter must be provided")
 
+# @router.delete("/books/{book_id}")
+# async def admin_delete_book(
+#     id: int,
+#     admin = Depends(require_admin)
+# ):
+#     """
+#     Admin-only endpoint to delete a book by ID.
+#     """
+#     return {"message": f"Admin user '{admin.username}' deleted book with ID {id}"}
 
 
 # """TESTING WRAPPERS"""
