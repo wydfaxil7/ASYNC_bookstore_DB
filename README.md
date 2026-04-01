@@ -16,7 +16,8 @@ Designed with a **clean layered architecture** to ensure scalability, maintainab
 - 🔍 Dynamic filtering:
   - Filter by **author**
   - Filter by **genre**
-  - Filter by **published date range**
+  - Filter by **published date range** (supports year, year-month, or full date)
+- 🔀 **Advanced sorting** by name, author, published_date, or genre (asc/desc)
 - 📦 Bulk book creation endpoint
 - 🤖 **AI-Powered Features:**
   - **AI Book Search** - Natural language book discovery
@@ -152,13 +153,34 @@ http://127.0.0.1:8000
 ```bash
 /books?genre=Fantasy
 ```
-### Filter by Date Range
+### Filter by Date Range (Flexible Formats)
 ```bash
-/books?start_date=2000-01-01&end_date=2020-01-01
+# Full date
+/books?start_date=2000-01-01&end_date=2020-12-31
+
+# Year only
+/books?start_date=2000&end_date=2020
+
+# Year and month
+/books?start_date=2000-01&end_date=2020-12
 ```
-### Combined Filters
+### Sorting
 ```bash
-/books?author=John&genre=Fiction&limit=5&offset=0
+# Sort by name (ascending)
+/books?sort_by=name&order=asc
+
+# Sort by published date (descending - default)
+/books?sort_by=published_date&order=desc
+
+# Sort by genre
+/books?sort_by=genre&order=asc
+
+# Available sort fields: name, author, published_date, genre
+# Available orders: asc, desc
+```
+### Combined Filters & Sorting
+```bash
+/books?author=Rowling&genre=Fantasy&start_date=1997&end_date=2007&sort_by=name&order=asc&limit=5&offset=0
 ```
 ---
 
@@ -245,6 +267,8 @@ Handles:
 - SQLAlchemy async queries
 - Clean backend layering
 - Pagination & filtering patterns
+- **Advanced sorting with SQLAlchemy order_by()**
+- **Flexible date parsing (year/month/day support)**
 - Bulk data handling
 - Pydantic v2 migration
 - **AI Integration with Groq API**
@@ -258,7 +282,7 @@ Handles:
 - ✅ **AI-Powered Search** (Implemented)
 - ✅ **AI Recommendations** (Implemented)
 - ✅ **AI Book Summaries** (Implemented)
-- 🔃 Sorting (sort_by, order)
+- ✅ **Advanced Sorting** (Implemented)
 - 🔐 Authentication & authorization
 - 🔍 Advanced full-text search
 - 🐳 Docker support

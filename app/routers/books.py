@@ -33,13 +33,15 @@ async def get_books(limit: int = 10,
                     offset: int = 0,
                     author: str | None = None,
                     genre: str | None = None,
-                    start_date: date | None = None,
-                    end_date: date | None= None,
+                    start_date: str | None = None,
+                    end_date: str | None = None,
+                    sort_by: str | None = None,
+                    order: str | None = None,
                     db: AsyncSession = Depends(get_db)):
     """
     Fetche all books
     """
-    return await services.get_books_service(db, limit, offset, author, genre, start_date, end_date)
+    return await services.get_books_service(db, limit, offset, author, genre, start_date, end_date, sort_by, order)
 
 @router.get("/books/search", response_model = List[schemas.BookResponse])
 async def search_book(
