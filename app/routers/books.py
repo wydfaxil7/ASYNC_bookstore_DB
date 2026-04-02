@@ -1,5 +1,5 @@
 #app/routers/books.py
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Security
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from app import schemas
@@ -11,38 +11,45 @@ from app.services.ai_prompts import build_search_prompt
 from app.schemas import BookListResponse, AuthorResponse, BookSummaryResponse
 from app.dependencies.auth_dependencies import require_admin, get_current_user
 from fastapi import HTTPException, status
+from app.dependencies.security import bearer_scheme, get_current_user_from_token
 
 
 router = APIRouter()
 
 @router.post("/books", response_model=schemas.BookResponse)
-async def create_book(book: schemas.BookCreate, 
-                      db: AsyncSession = Depends(get_db),
-                      current_user = Depends(get_current_user)
-                      ):
+async def create_book(
+    book: schemas.BookCreate, 
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Security(require_admin)
+):
     """
     Creates a new book
     """
     return await services.create_book_service(db, book.model_dump())
 
 @router.post("/books/bulk", response_model=List[schemas.BookResponse])
-async def create_bulk_books(payload :schemas.BookBulkCreate,
-                            db: AsyncSession = Depends(get_db)):
+async def create_bulk_books(
+    payload :schemas.BookBulkCreate,
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Security(require_admin)
+):
     """
     Create books in bulk
     """
     return await services.create_bulk_books_service(db, [book.model_dump() for book in payload.books])
 
 @router.get("/books", response_model=schemas.BookListResponse)
-async def get_books(limit: int = 10,
-                    offset: int = 0,
-                    author: str | None = None,
-                    genre: str | None = None,
-                    start_date: str | None = None,
-                    end_date: str | None = None,
-                    sort_by: str | None = None,
-                    order: str | None = None,
-                    db: AsyncSession = Depends(get_db)):
+async def get_books(
+    limit: int = 10,
+    offset: int = 0,
+    author: str | None = None,
+    genre: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    sort_by: str | None = None,
+    order: str | None = None,
+    db: AsyncSession = Depends(get_db)
+):
     """
     Fetche all books
     """
@@ -110,21 +117,23 @@ async def get_book(book_id: int, db: AsyncSession = Depends(get_db)):
     return await services.get_book_service(db, book_id)
 
 @router.put("/books/{book_id}", response_model=schemas.BookResponse)
-async def update_book(book_id: int, 
-                      book: schemas.BookUpdate, 
-                      db: AsyncSession = Depends(get_db),
-                      current_user = Depends(get_current_user)
-                      ):
+async def update_book(
+    book_id: int, 
+    book: schemas.BookUpdate, 
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Security(require_admin)
+):
     """
     Updates an existing book
     """
     return await services.update_book_service(db, book_id, book.model_dump())
 
 @router.delete("/books/{book_id}")
-async def delete_book(book_id: int, 
-                      db: AsyncSession = Depends(get_db),
-                      admin = Depends(require_admin),
-                      ):
+async def delete_book(
+    book_id: int, 
+    db: AsyncSession = Depends(get_db),
+    admin: dict = Security(require_admin)
+):
     """
     Delete a book by its ID
     """
