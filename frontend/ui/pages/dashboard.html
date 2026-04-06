@@ -18,6 +18,7 @@
       <a class="brand" href="/ui/dashboard">ASYNC Bookstore</a>
       <nav>
         <a class="admin-only" href="/ui/books/write">Write</a>
+        <a class="admin-only" href="#" id="editBooksSecureBtn">Edit Books</a>
         <a href="/ui/books/view">View</a>
         <a href="/ui/books/search">Search</a>
         <a href="/ui/books/ai-search">AI Search</a>
@@ -70,6 +71,13 @@
           <h2>Create and bulk create</h2>
           <p class="muted">Use one page for both write actions.</p>
           <a class="btn" href="/ui/books/write">Open Write Page</a>
+        </article>
+
+        <article class="panel reveal delay-1 admin-only">
+          <p class="kicker">EDIT</p>
+          <h2>Update and delete books</h2>
+          <p class="muted">Requires password confirmation before entering edit mode.</p>
+          <a class="btn" href="#" id="editBooksSecureCardBtn">Open Edit Books</a>
         </article>
 
         <article class="panel reveal delay-1">
