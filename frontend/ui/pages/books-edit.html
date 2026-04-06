@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Books | ASYNC Bookstore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/ui/css/styles.css" />
+  </head>
+  <body class="post-login-body page-view">
+    <div class="bg-grid"></div>
+    <header class="site-header container">
+      <a class="brand" href="/ui/dashboard">ASYNC Bookstore</a>
+      <nav>
+        <a href="/ui/books/view">View Books</a>
+        <a href="/ui/books/search">Search</a>
+        <a href="/ui/profile">Profile</a>
+        <a href="#" class="logout-link">Logout</a>
+      </nav>
+    </header>
+
+    <main class="container page-shell">
+      <section class="panel dashboard-hero reveal">
+        <div>
+          <p class="kicker">ADMIN MODE</p>
+          <h1 class="dash-title">Edit Books</h1>
+          <p class="muted">This page provides only two actions for admins: update and delete.</p>
+        </div>
+        <img src="/static/ui/assets/bookstore-hero.svg" alt="Bookstore shelf illustration" />
+      </section>
+
+      <section class="page-grid-2">
+        <article class="panel reveal">
+          <div class="section-head">
+            <h2>Option 1: Update Book</h2>
+            <span class="badge">Admin</span>
+          </div>
+
+          <form id="loadBookForm" class="stack">
+            <input type="number" id="targetBookId" min="1" placeholder="Enter Book ID" required />
+            <button type="submit" class="btn ghost">Load Book</button>
+          </form>
+
+          <form id="updateBookForm" class="stack mtop">
+            <input type="text" id="editName" placeholder="Name" required />
+            <input type="text" id="editAuthor" placeholder="Author" required />
+            <input type="text" id="editGenre" placeholder="Genre" />
+            <input type="date" id="editPublishedDate" />
+            <textarea id="editDescription" rows="4" placeholder="Description"></textarea>
+            <button type="submit" class="btn">Update Book</button>
+          </form>
+        </article>
+
+        <article class="panel reveal delay-1">
+          <div class="section-head">
+            <h2>Option 2: Delete Book</h2>
+            <span class="badge badge-ai">Danger</span>
+          </div>
+          <p class="muted">Delete the currently loaded book by ID.</p>
+          <div class="row-wrap">
+            <button id="deleteBookBtn" class="btn ghost danger" type="button">Delete Loaded Book</button>
+          </div>
+          <div id="selectedBookPreview" class="section-stack mtop"></div>
+        </article>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="/static/ui/js/common.js"></script>
+    <script src="/static/ui/js/books-edit.js"></script>
+  </body>
+</html>

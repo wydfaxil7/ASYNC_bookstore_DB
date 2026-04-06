@@ -64,6 +64,11 @@ async def frontend_books_view():
     return _ui_file("books-view.html")
 
 
+@app.get("/ui/books/edit", include_in_schema=False)
+async def frontend_books_edit():
+    return _ui_file("books-edit.html")
+
+
 @app.get("/ui/books/search", include_in_schema=False)
 async def frontend_books_search():
     return _ui_file("books-search.html")
