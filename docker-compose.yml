@@ -3,10 +3,12 @@ services:
     image: postgres:15-alpine
     container_name: bookstore_postgres
     restart: always
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: wydfaxil
-      POSTGRES_PASSWORD: Aprinov-1428
-      POSTGRES_DB: bookstore
+      POSTGRES_USER: ${POSTGRES_USER:-wydfaxil}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Aprinov-1428}
+      POSTGRES_DB: ${POSTGRES_DB:-bookstore}
     ports:
       - "5433:5432"
     volumes:
@@ -25,6 +27,12 @@ services:
       - postgres
     env_file:
       - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      SECRET_KEY: ${SECRET_KEY}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
   
 volumes:
   postgres_data:

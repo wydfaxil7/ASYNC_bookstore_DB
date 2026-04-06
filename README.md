@@ -1,32 +1,91 @@
 # ASYNC Bookstore DB
 
-This repository is now organized into two top-level folders:
+Async FastAPI bookstore API + modular frontend UI.
 
-- `backend/` - FastAPI API, models, services, tests
-- `frontend/` - Multi-page UI assets (pages, css, js, images)
+Project is split into:
 
-## Structure
+- `backend/` for API, business logic, and tests
+- `frontend/` for pages, JS controllers, styles, and assets
+
+## Full Folder Structure
 
 ```text
 BOOKSTORE_DB/
+├── .dockerignore
+├── .env
+├── .gitignore
+├── docker-compose.yml
+├── Dockerfile
+├── pyrightconfig.json
+├── README.md
 ├── backend/
-│   ├── app/
-│   ├── tests/
+│   ├── README.md
 │   ├── pyproject.toml
 │   ├── poetry.lock
-│   └── README.md
-├── frontend/
-│   └── ui/
-│       ├── pages/
-│       ├── css/
-│       ├── js/
-│       └── assets/
-└── README.md
+│   ├── requirements.txt
+│   ├── books.db
+│   ├── test_hash.py
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── database.py
+│   │   ├── main.py
+│   │   ├── models.py
+│   │   ├── schemas.py
+│   │   ├── Repository/
+│   │   │   ├── books.py
+│   │   │   └── users.py
+│   │   ├── dependencies/
+│   │   │   ├── auth_dependencies.py
+│   │   │   └── security.py
+│   │   ├── routers/
+│   │   │   ├── auth.py
+│   │   │   └── books.py
+│   │   ├── services/
+│   │   │   ├── ai.py
+│   │   │   ├── ai_prompts.py
+│   │   │   ├── auth.py
+│   │   │   ├── auth_service.py
+│   │   │   └── books.py
+│   │   └── utils/
+│   │       ├── groq_client.py
+│   │       └── wrappers.py
+│   └── tests/
+│       ├── __init__.py
+│       ├── test_auths.py
+│       └── test_books.py
+└── frontend/
+	└── ui/
+		├── assets/
+		│   ├── ai-books.svg
+		│   └── bookstore-hero.svg
+		├── css/
+		│   └── styles.css
+		├── js/
+		│   ├── auth.js
+		│   ├── common.js
+		│   ├── dashboard.js
+		│   ├── profile.js
+		│   ├── books-write.js
+		│   ├── books-view.js
+		│   ├── books-search.js
+		│   ├── books-ai-search.js
+		│   ├── books-ai-summary.js
+		│   └── books-ai-recommendations.js
+		└── pages/
+			├── landing.html
+			├── login.html
+			├── register.html
+			├── dashboard.html
+			├── profile.html
+			├── books-write.html
+			├── books-view.html
+			├── books-search.html
+			├── books-ai-search.html
+			├── books-ai-summary.html
+			└── books-ai-recommendations.html
 ```
 
-## Run Backend
-
-From repository root:
+## Run Locally (Poetry)
 
 ```bash
 cd backend
@@ -34,22 +93,36 @@ poetry install
 poetry run uvicorn app.main:app --reload
 ```
 
-Then open:
+## Run With Docker
+
+From repository root:
+
+```bash
+docker compose up --build
+```
+
+## URLs
 
 - API root: `http://127.0.0.1:8000/`
 - UI landing: `http://127.0.0.1:8000/ui`
+- Dashboard: `http://127.0.0.1:8000/ui/dashboard`
 - Swagger: `http://127.0.0.1:8000/docs`
+- ReDoc: `http://127.0.0.1:8000/redoc`
 
 ## Frontend Routes
 
-- `/ui` - Landing page
-- `/ui/login` - Login page
-- `/ui/register` - Register page
-- `/ui/dashboard` - Book operations + AI featured operations
-- `/ui/profile` - Profile page (`/auth/me`)
+- `/ui`
+- `/ui/login`
+- `/ui/register`
+- `/ui/dashboard`
+- `/ui/profile`
+- `/ui/books/write`
+- `/ui/books/view`
+- `/ui/books/search`
+- `/ui/books/ai-search`
+- `/ui/books/ai-summary`
+- `/ui/books/ai-recommendations`
 
-## Detailed Backend Documentation
+## Backend Docs
 
-Full backend feature documentation is available in:
-
-- `backend/README.md`
+Detailed API/service notes are available in `backend/README.md`.
