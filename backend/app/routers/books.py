@@ -55,7 +55,7 @@ async def get_books(
     """
     return await services.get_books_service(db, limit, offset, author, genre, start_date, end_date, sort_by, order)
 
-@router.get("/books/search", response_model = List[schemas.BookResponse])
+@router.get("/books/search", response_model=schemas.BookListResponse)
 async def search_book(
     q: str | None = None,
     genre: str | None = None,

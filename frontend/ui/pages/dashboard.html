@@ -12,81 +12,103 @@
     />
     <link rel="stylesheet" href="/static/ui/css/styles.css" />
   </head>
-  <body class="post-login-body">
+  <body class="post-login-body page-dashboard">
     <div class="bg-grid"></div>
     <header class="site-header container">
-      <a class="brand" href="/ui">ASYNC Bookstore</a>
+      <a class="brand" href="/ui/dashboard">ASYNC Bookstore</a>
       <nav>
-        <a href="/ui/profile">My Profile</a>
-        <a href="/ui/login">Login</a>
-        <a href="/ui/register">Register</a>
+        <a class="admin-only" href="/ui/books/write">Write</a>
+        <a href="/ui/books/view">View</a>
+        <a href="/ui/books/search">Search</a>
+        <a href="/ui/books/ai-search">AI Search</a>
+        <a href="/ui/profile">Profile</a>
+        <a href="#" class="logout-link">Logout</a>
       </nav>
     </header>
 
-    <main class="container dashboard-shell">
+    <main class="container page-shell">
       <section class="panel dashboard-hero reveal">
         <div>
           <p class="kicker">BOOKSTORE MODE</p>
-          <h1 class="dash-title">Shelf Operations</h1>
-          <p class="muted">Core book management and AI featured tools are now separated for a cleaner workflow.</p>
+          <h1 class="dash-title">Shelf Operations Hub</h1>
+          <p class="muted">Every book action now has its own page, and AI features sit in their own section.</p>
         </div>
         <img src="/static/ui/assets/bookstore-hero.svg" alt="Bookstore shelf illustration" />
       </section>
 
-      <section class="panel reveal">
-        <div class="section-head">
-          <h2>Core Book Operations</h2>
-          <span class="badge">Books</span>
-        </div>
-        <form id="filterForm" class="row-wrap">
-          <input type="text" id="q" placeholder="Search by title or author" />
-          <input type="text" id="genre" placeholder="Genre" />
-          <input type="text" id="author" placeholder="Author" />
-          <button type="submit" class="btn">Search</button>
-        </form>
-        <div class="row-wrap mtop">
-          <button id="loadBooksBtn" class="btn ghost">Load Default</button>
-          <button id="clearBooksBtn" class="btn ghost">Clear Filters</button>
-        </div>
+      <section class="page-grid-2">
+        <article class="panel reveal">
+          <div class="section-head">
+            <h2>Book Pages</h2>
+            <span class="badge">Core</span>
+          </div>
+          <div class="toolbar">
+            <a class="tab-link active admin-only" href="/ui/books/write">Create and Bulk Create</a>
+            <a class="tab-link" href="/ui/books/view">Get Books and Get by ID</a>
+            <a class="tab-link" href="/ui/books/search">Search Books</a>
+          </div>
+        </article>
+
+        <article class="panel ai-featured reveal delay-1">
+          <div class="section-head">
+            <h2>AI Pages</h2>
+            <span class="badge badge-ai">Featured</span>
+          </div>
+          <p class="muted">Natural language search, summaries, and recommendations live separately so the output stays readable.</p>
+          <img class="ai-banner" src="/static/ui/assets/ai-books.svg" alt="AI and books illustration" />
+          <div class="toolbar">
+            <a class="tab-link active" href="/ui/books/ai-search">AI Search</a>
+            <a class="tab-link" href="/ui/books/ai-summary">AI Summary</a>
+            <a class="tab-link" href="/ui/books/ai-recommendations">AI Recommendations</a>
+          </div>
+        </article>
       </section>
 
-      <section class="panel reveal delay-1">
-        <h2>Create Book (Admin)</h2>
-        <form id="createBookForm" class="stack">
-          <input type="text" id="bookName" placeholder="Name" required />
-          <input type="text" id="bookAuthor" placeholder="Author" required />
-          <input type="text" id="bookGenre" placeholder="Genre" />
-          <input type="date" id="bookDate" />
-          <textarea id="bookDescription" rows="3" placeholder="Description"></textarea>
-          <button type="submit" class="btn">Create</button>
-        </form>
+      <section class="page-grid-3">
+        <article class="panel reveal delay-1 admin-only">
+          <p class="kicker">WRITE</p>
+          <h2>Create and bulk create</h2>
+          <p class="muted">Use one page for both write actions.</p>
+          <a class="btn" href="/ui/books/write">Open Write Page</a>
+        </article>
+
+        <article class="panel reveal delay-1">
+          <p class="kicker">READ</p>
+          <h2>Get list and detail</h2>
+          <p class="muted">View the shelf and one book by ID on the same page.</p>
+          <a class="btn" href="/ui/books/view">Open View Page</a>
+        </article>
+
+        <article class="panel reveal delay-1">
+          <p class="kicker">SEARCH</p>
+          <h2>Search by title or genre</h2>
+          <p class="muted">Focused search results with pretty card output.</p>
+          <a class="btn" href="/ui/books/search">Open Search Page</a>
+        </article>
       </section>
 
-      <section class="panel ai-featured reveal delay-1">
+      <section class="panel reveal delay-2">
         <div class="section-head">
           <h2>AI Featured Operations</h2>
           <span class="badge badge-ai">AI</span>
         </div>
-        <p class="muted">Use natural language to discover books and generate summaries.</p>
-        <img class="ai-banner" src="/static/ui/assets/ai-books.svg" alt="AI and books illustration" />
-        <form id="aiSearchForm" class="row-wrap">
-          <input type="text" id="aiQuery" placeholder="Try: books about discipline and habits" />
-          <button type="submit" class="btn">Run AI Search</button>
-        </form>
-        <form id="summaryForm" class="row-wrap mtop">
-          <input type="number" id="summaryId" placeholder="Book ID (optional)" min="1" />
-          <input type="text" id="summaryName" placeholder="Book name (optional)" />
-          <button type="submit" class="btn ghost">Generate Summary</button>
-        </form>
-        <pre id="summaryOutput" class="summary-output">No summary generated yet.</pre>
-      </section>
-
-      <section class="panel reveal delay-2 full">
-        <div class="row-space">
-          <h2>Library Shelf</h2>
-          <span id="bookCount" class="muted">0 results</span>
+        <div class="page-grid-3">
+          <article class="note-card">
+            <p class="kicker">AI SEARCH</p>
+            <h3 class="note-title">Ask in plain language and read the intent summary.</h3>
+            <a class="tab-link" href="/ui/books/ai-search">Open</a>
+          </article>
+          <article class="note-card">
+            <p class="kicker">AI SUMMARY</p>
+            <h3 class="note-title">Turn one book into a story-like summary panel.</h3>
+            <a class="tab-link" href="/ui/books/ai-summary">Open</a>
+          </article>
+          <article class="note-card">
+            <p class="kicker">AI RECOMMENDATIONS</p>
+            <h3 class="note-title">Browse recommendation results as featured cards.</h3>
+            <a class="tab-link" href="/ui/books/ai-recommendations">Open</a>
+          </article>
         </div>
-        <div id="bookGrid" class="book-grid"></div>
       </section>
     </main>
 

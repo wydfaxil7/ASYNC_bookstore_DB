@@ -68,31 +68,39 @@ async def search_book(db: AsyncSession,
                       genre: str | None = None,
                       limit: int = 10,
                       offset: int = 0,
-                      ) -> List[Book]:
+                      ) -> tuple[List[Book], int]:
     """
     Search book by title and author, with optional genre filter and pagination
     """
 
     query = select(Book)
+    count_query = select(func.count()).select_from(Book)
 
     # Search by title OR author
     if q:
         search_term = f"%{q}%"
-        query = query.where(
+        predicate = (
             or_(
                 Book.name.ilike(search_term),
                 Book.author.ilike(search_term)
             )
         )
+        query = query.where(predicate)
+        count_query = count_query.where(predicate)
 
     # Filter by Genre
     if genre:
-        query = query.where(Book.genre == genre)
+        genre_filter = Book.genre == genre
+        query = query.where(genre_filter)
+        count_query = count_query.where(genre_filter)
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
         
     #Pagination
     query = query.offset(offset).limit(limit)
     result = await db.execute(query)
-    return result.scalars().all()
+    return result.scalars().all(), total
 
 # async def get_books_with_count(db: AsyncSession,
 #                                limit: int = 10,

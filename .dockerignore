@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Docker / system
+*.swp
+*.DS_Store
+*.env
+
+# Poetry cache (optional)
+.cache/
+
+# IDE files
+.vscode/
+.idea/
+
+# Databases / local files
+books.db
+
+# Logs
+*.log
+
+# Git
+.git/
+.gitignore
+
+# Pytest
+.pytest_cache

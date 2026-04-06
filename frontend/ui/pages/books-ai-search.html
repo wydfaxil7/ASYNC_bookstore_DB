@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Search | ASYNC Bookstore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/ui/css/styles.css" />
+  </head>
+  <body class="post-login-body page-ai-search">
+    <div class="bg-grid"></div>
+    <header class="site-header container">
+      <a class="brand" href="/ui/dashboard">ASYNC Bookstore</a>
+      <nav>
+        <a href="/ui/books/search">Search</a>
+        <a href="/ui/books/ai-summary">AI Summary</a>
+        <a href="/ui/books/ai-recommendations">AI Recommendations</a>
+        <a href="/ui/profile">Profile</a>
+        <a href="#" class="logout-link">Logout</a>
+      </nav>
+    </header>
+
+    <main class="container page-shell">
+      <section class="panel dashboard-hero reveal">
+        <div>
+          <p class="kicker">AI FEATURED</p>
+          <h1 class="dash-title">Natural Language Search</h1>
+          <p class="muted">Ask in plain words and get back book results with a readable intent summary.</p>
+        </div>
+        <img class="ai-banner" src="/static/ui/assets/ai-books.svg" alt="AI and books illustration" />
+      </section>
+
+      <section class="panel reveal">
+        <div class="section-head">
+          <h2>Ask AI</h2>
+          <span class="badge badge-ai">Intent aware</span>
+        </div>
+        <form id="aiSearchForm" class="stack">
+          <textarea id="aiQuery" rows="4" placeholder="Try: books about discipline, habits, and productivity"></textarea>
+          <div class="row-wrap">
+            <input type="number" id="limit" value="20" min="1" />
+            <input type="number" id="offset" value="0" min="0" readonly />
+          </div>
+          <button type="submit" class="btn">Run AI Search</button>
+        </form>
+      </section>
+
+      <section class="page-grid-2">
+        <article class="panel reveal delay-1">
+          <div class="row-space">
+            <h2>AI Result Summary</h2>
+            <span id="aiStatus" class="muted">Waiting for query</span>
+          </div>
+          <div id="aiMeta" class="section-stack"></div>
+        </article>
+        <article class="panel reveal delay-1">
+          <h2>AI Result Books</h2>
+          <div id="aiResults" class="book-grid"></div>
+          <div id="aiPagination"></div>
+        </article>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="/static/ui/js/common.js"></script>
+    <script src="/static/ui/js/books-ai-search.js"></script>
+  </body>
+</html>

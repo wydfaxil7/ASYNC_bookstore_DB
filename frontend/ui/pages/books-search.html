@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search Books | ASYNC Bookstore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/ui/css/styles.css" />
+  </head>
+  <body class="post-login-body page-search">
+    <div class="bg-grid"></div>
+    <header class="site-header container">
+      <a class="brand" href="/ui/dashboard">ASYNC Bookstore</a>
+      <nav>
+        <a href="/ui/books/view">Get Books</a>
+        <a class="admin-only" href="/ui/books/write">Create Books</a>
+        <a href="/ui/books/ai-search">AI Search</a>
+        <a href="/ui/profile">Profile</a>
+        <a href="#" class="logout-link">Logout</a>
+      </nav>
+    </header>
+
+    <main class="container page-shell">
+      <section class="panel dashboard-hero reveal">
+        <div>
+          <p class="kicker">SEARCH OPERATIONS</p>
+          <h1 class="dash-title">Search Books</h1>
+          <p class="muted">This page is dedicated to search-only workflows so the results stay focused and readable.</p>
+        </div>
+        <img src="/static/ui/assets/bookstore-hero.svg" alt="Bookstore shelf illustration" />
+      </section>
+
+      <section class="panel reveal">
+        <div class="section-head">
+          <h2>Search Form</h2>
+          <span class="badge">Search</span>
+        </div>
+        <form id="searchForm" class="stack">
+          <div class="row-wrap">
+            <input type="text" id="query" placeholder="Search title or author" />
+            <input type="text" id="genre" placeholder="Genre" />
+          </div>
+          <div class="row-wrap">
+            <input type="number" id="limit" value="20" min="1" />
+            <input type="number" id="offset" value="0" min="0" readonly />
+          </div>
+          <button type="submit" class="btn">Search Books</button>
+        </form>
+      </section>
+
+      <section class="panel reveal delay-1">
+        <div class="row-space">
+          <h2>Search Results</h2>
+          <span id="searchStatus" class="muted">Waiting for search</span>
+        </div>
+        <div id="searchResults" class="book-grid"></div>
+        <div id="searchPagination"></div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="/static/ui/js/common.js"></script>
+    <script src="/static/ui/js/books-search.js"></script>
+  </body>
+</html>

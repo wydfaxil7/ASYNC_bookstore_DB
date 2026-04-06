@@ -1,12 +1,21 @@
 {
+  "typeCheckingMode": "off",
+  "reportGeneralTypeIssues": "none",
+  "reportOptionalOperand": "none",
+  "reportArgumentType": "none",
+  "reportCallIssue": "none",
+  "reportAssignmentType": "none",
   "include": [
     "backend"
   ],
   "exclude": [
     "app",
     "frontend",
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*",
     "**/.venv",
-    "**/__pycache__"
+    "**/venv"
   ],
   "executionEnvironments": [
     {

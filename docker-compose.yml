@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: bookstore_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: wydfaxil
+      POSTGRES_PASSWORD: Aprinov-1428
+      POSTGRES_DB: bookstore
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bookstore_api
+    command: >
+      uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+  
+volumes:
+  postgres_data:

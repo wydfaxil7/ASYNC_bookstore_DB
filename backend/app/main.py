@@ -12,6 +12,8 @@ app.include_router(auth.router)
 
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR.parent.parent / "frontend"
+if not FRONTEND_DIR.exists():
+    FRONTEND_DIR = BASE_DIR.parent / "frontend"
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 UI_PAGES_DIR = FRONTEND_DIR / "ui" / "pages"
 
@@ -50,6 +52,36 @@ async def frontend_register():
 @app.get("/ui/dashboard", include_in_schema=False)
 async def frontend_dashboard():
     return _ui_file("dashboard.html")
+
+
+@app.get("/ui/books/write", include_in_schema=False)
+async def frontend_books_write():
+    return _ui_file("books-write.html")
+
+
+@app.get("/ui/books/view", include_in_schema=False)
+async def frontend_books_view():
+    return _ui_file("books-view.html")
+
+
+@app.get("/ui/books/search", include_in_schema=False)
+async def frontend_books_search():
+    return _ui_file("books-search.html")
+
+
+@app.get("/ui/books/ai-search", include_in_schema=False)
+async def frontend_books_ai_search():
+    return _ui_file("books-ai-search.html")
+
+
+@app.get("/ui/books/ai-summary", include_in_schema=False)
+async def frontend_books_ai_summary():
+    return _ui_file("books-ai-summary.html")
+
+
+@app.get("/ui/books/ai-recommendations", include_in_schema=False)
+async def frontend_books_ai_recommendations():
+    return _ui_file("books-ai-recommendations.html")
 
 
 @app.get("/ui/profile", include_in_schema=False)
