@@ -1,0 +1,27 @@
+<svg width="960" height="260" viewBox="0 0 960 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="960" y2="260" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0D2A32"/>
+      <stop offset="1" stop-color="#104349"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="260" rx="18" fill="url(#g1)"/>
+
+  <rect x="70" y="70" width="34" height="130" rx="4" fill="#FF8A00"/>
+  <rect x="110" y="52" width="42" height="148" rx="4" fill="#D65E48"/>
+  <rect x="158" y="80" width="30" height="120" rx="4" fill="#6D6AB8"/>
+  <rect x="194" y="60" width="40" height="140" rx="4" fill="#1F8C84"/>
+  <rect x="240" y="88" width="26" height="112" rx="4" fill="#BA925E"/>
+
+  <circle cx="535" cy="130" r="66" fill="#112128"/>
+  <circle cx="535" cy="130" r="42" fill="#1A3B43"/>
+  <path d="M513 130h44M535 108v44" stroke="#22C9C0" stroke-width="7" stroke-linecap="round"/>
+
+  <rect x="660" y="56" width="220" height="148" rx="14" fill="#121B26"/>
+  <rect x="678" y="74" width="184" height="40" rx="8" fill="#1B2B38"/>
+  <rect x="678" y="122" width="184" height="64" rx="8" fill="#0D141D"/>
+  <path d="M706 94h68M706 142h130M706 160h94" stroke="#6CDCD3" stroke-width="6" stroke-linecap="round"/>
+
+  <text x="340" y="58" fill="#C9F7F2" font-family="Arial" font-size="30" font-weight="700">AI Featured Zone</text>
+  <text x="338" y="90" fill="#95C6C1" font-family="Arial" font-size="17">Natural-language search and smart summaries</text>
+</svg>

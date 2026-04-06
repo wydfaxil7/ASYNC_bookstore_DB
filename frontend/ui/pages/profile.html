@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile | ASYNC Bookstore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Unbounded:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/ui/css/styles.css" />
+  </head>
+  <body class="post-login-body">
+    <div class="bg-grid"></div>
+    <header class="site-header container">
+      <a class="brand" href="/ui">ASYNC Bookstore</a>
+      <nav>
+        <a href="/ui/dashboard">Dashboard</a>
+        <a href="/ui/login">Login</a>
+      </nav>
+    </header>
+
+    <main class="container centered">
+      <section class="panel profile-panel reveal">
+        <h1>My Profile</h1>
+        <p class="muted">Data from <code>/auth/me</code>.</p>
+        <pre id="profileOutput" class="summary-output">Loading...</pre>
+        <div class="row-wrap">
+          <button id="refreshProfileBtn" class="btn ghost">Refresh</button>
+          <button id="logoutBtn" class="btn ghost danger">Logout</button>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="/static/ui/js/common.js"></script>
+    <script src="/static/ui/js/profile.js"></script>
+  </body>
+</html>

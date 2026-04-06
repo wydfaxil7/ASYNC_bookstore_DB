@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | ASYNC Bookstore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Unbounded:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/ui/css/styles.css" />
+  </head>
+  <body class="post-login-body">
+    <div class="bg-grid"></div>
+    <header class="site-header container">
+      <a class="brand" href="/ui">ASYNC Bookstore</a>
+      <nav>
+        <a href="/ui/profile">My Profile</a>
+        <a href="/ui/login">Login</a>
+        <a href="/ui/register">Register</a>
+      </nav>
+    </header>
+
+    <main class="container dashboard-shell">
+      <section class="panel dashboard-hero reveal">
+        <div>
+          <p class="kicker">BOOKSTORE MODE</p>
+          <h1 class="dash-title">Shelf Operations</h1>
+          <p class="muted">Core book management and AI featured tools are now separated for a cleaner workflow.</p>
+        </div>
+        <img src="/static/ui/assets/bookstore-hero.svg" alt="Bookstore shelf illustration" />
+      </section>
+
+      <section class="panel reveal">
+        <div class="section-head">
+          <h2>Core Book Operations</h2>
+          <span class="badge">Books</span>
+        </div>
+        <form id="filterForm" class="row-wrap">
+          <input type="text" id="q" placeholder="Search by title or author" />
+          <input type="text" id="genre" placeholder="Genre" />
+          <input type="text" id="author" placeholder="Author" />
+          <button type="submit" class="btn">Search</button>
+        </form>
+        <div class="row-wrap mtop">
+          <button id="loadBooksBtn" class="btn ghost">Load Default</button>
+          <button id="clearBooksBtn" class="btn ghost">Clear Filters</button>
+        </div>
+      </section>
+
+      <section class="panel reveal delay-1">
+        <h2>Create Book (Admin)</h2>
+        <form id="createBookForm" class="stack">
+          <input type="text" id="bookName" placeholder="Name" required />
+          <input type="text" id="bookAuthor" placeholder="Author" required />
+          <input type="text" id="bookGenre" placeholder="Genre" />
+          <input type="date" id="bookDate" />
+          <textarea id="bookDescription" rows="3" placeholder="Description"></textarea>
+          <button type="submit" class="btn">Create</button>
+        </form>
+      </section>
+
+      <section class="panel ai-featured reveal delay-1">
+        <div class="section-head">
+          <h2>AI Featured Operations</h2>
+          <span class="badge badge-ai">AI</span>
+        </div>
+        <p class="muted">Use natural language to discover books and generate summaries.</p>
+        <img class="ai-banner" src="/static/ui/assets/ai-books.svg" alt="AI and books illustration" />
+        <form id="aiSearchForm" class="row-wrap">
+          <input type="text" id="aiQuery" placeholder="Try: books about discipline and habits" />
+          <button type="submit" class="btn">Run AI Search</button>
+        </form>
+        <form id="summaryForm" class="row-wrap mtop">
+          <input type="number" id="summaryId" placeholder="Book ID (optional)" min="1" />
+          <input type="text" id="summaryName" placeholder="Book name (optional)" />
+          <button type="submit" class="btn ghost">Generate Summary</button>
+        </form>
+        <pre id="summaryOutput" class="summary-output">No summary generated yet.</pre>
+      </section>
+
+      <section class="panel reveal delay-2 full">
+        <div class="row-space">
+          <h2>Library Shelf</h2>
+          <span id="bookCount" class="muted">0 results</span>
+        </div>
+        <div id="bookGrid" class="book-grid"></div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="/static/ui/js/common.js"></script>
+    <script src="/static/ui/js/dashboard.js"></script>
+  </body>
+</html>
