@@ -1,8 +1,8 @@
-# 🛍️ ASYNC Bookstore API with AI-Powered Features
+# 🛍️ ASYNC Bookstore API with AI-Powered Features & Docker
 
-> A high-performance asynchronous Bookstore API built with **FastAPI, Async SQLAlchemy, PostgreSQL, and Groq AI**.
+> A high-performance asynchronous Bookstore API built with **FastAPI, Async SQLAlchemy, PostgreSQL, JWT Auth, and Groq AI**, now fully Dockerized.
 
-Designed with a **clean layered architecture** to ensure scalability, maintainability, and production-readiness. Now featuring **AI-powered book search, recommendations, and summaries**.
+Designed with a **clean layered architecture** to ensure scalability, maintainability, and production-readiness. Features **AI-powered book search, recommendations, and story-like summaries**.
 
 ---
 
@@ -19,13 +19,15 @@ Designed with a **clean layered architecture** to ensure scalability, maintainab
   - Filter by **published date range** (supports year, year-month, or full date)
 - 🔀 **Advanced sorting** by name, author, published_date, or genre (asc/desc)
 - 📦 Bulk book creation endpoint
+- 🛡️ JWT authentication & admin-only protections
 - 🤖 **AI-Powered Features:**
-  - **AI Book Search** - Natural language book discovery
-  - **AI Recommendations** - Personalized book suggestions
-  - **AI Summaries** - Story-like book summaries using Groq AI
+  - **AI Book Search** — Natural language book discovery
+  - **AI Recommendations** — Personalized book suggestions
+  - **AI Summaries** — Story-like book summaries using Groq AI
 - 🧠 Pydantic v2 schemas (`model_dump`, `from_attributes`)
 - 🛡️ Centralized error handling using wrappers
-- 📘 Auto-generated API docs (Swagger & ReDoc)  
+- 📘 Auto-generated API docs (Swagger & ReDoc)
+- 🐳 Fully Dockerized (API + PostgreSQL)
 
 ---
 
@@ -38,28 +40,31 @@ BOOKSTORE_DB/
 │   │   └── books.py
 │   ├── services/
 │   │   ├── books.py
-│   │   ├── ai.py          # NEW: AI service functions
-│   │   └── ai_prompts.py  # NEW: AI prompt templates
+│   │   ├── ai.py          # AI service functions
+│   │   └── ai_prompts.py  # AI prompt templates
 │   ├── routers/
 │   │   └── books.py
 │   ├── utils/
 │   │   ├── wrappers.py
-│   │   └── groq_client.py # NEW: Groq AI client
+│   │   └── groq_client.py # Groq AI client
 │   ├── database.py
 │   ├── models.py
 │   ├── schemas.py
 │   └── main.py
 ├── tests/
-├── .env
+├── Dockerfile
+├── docker-compose.yml
+├── .env.example
 ├── pyproject.toml
 └── README.md
 ```
 
 ---
+
 ## 📦 Tech Stack
 
 | Tech            | Usage |
-|-----------------|------|
+|-----------------|-------|
 | FastAPI         | Async web framework |
 | SQLAlchemy      | Async ORM |
 | PostgreSQL      | Database |
@@ -70,89 +75,121 @@ BOOKSTORE_DB/
 
 ---
 
-# 🛠️ Getting Started
+## 🛠️ Getting Started
 
-## 📥 Clone Repository
+### 📥 Clone Repository
 
 ```bash
 git clone https://github.com/your-username/BOOKSTORE_DB.git
 cd BOOKSTORE_DB
 ```
-## 📦 Install Dependencies
+
+### 📦 Install Dependencies
+
 ```bash
 poetry install
 poetry shell
 ```
+
 ---
 
 ## ⚙️ Environment Variables
 
-### Create a .env file:
+Create a `.env` file:
+
 ```bash
-DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/bookstore
-GROQ_API_KEY=your_groq_api_key_here
+DATABASE_URL=postgresql+asyncpg://wydfaxil:Aprinov-1428@localhost:5433/bookstore
+GROQ_API_KEY=your_groq_api_key
+SECRET_KEY=your_jwt_secret
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+REFRESH_TOKEN_EXPIRE_DAYS=7
 ```
 
+> ⚠️ Use `localhost:5433` for local Python runs.  
+> ⚠️ For Docker Compose, the `DATABASE_URL` should use `postgres:5432`.
+
+---
+
 ### 🗄️ Create Database Tables
+
 ```bash
 python create_tables.py
 ```
 
 ### 🚀 Run the API
+
+**Local:**
 ```bash
 poetry run uvicorn app.main:app --reload
 ```
+
+**Dockerized:**
+```bash
+docker compose up --build
+```
+
+- FastAPI → host port `8000`
+- PostgreSQL → host port `5433`
+
 ---
 
-## 🔗 Server 
-```bash
+## 🔗 Server
+
+```
 http://127.0.0.1:8000
 ```
+
 ---
 
 ## 📘 API Documentation
-```bash
-📄 Swagger UI → http://127.0.0.1:8000/docs
-📕 ReDoc → http://127.0.0.1:8000/redoc
+
 ```
+📄 Swagger UI → http://127.0.0.1:8000/docs
+📕 ReDoc      → http://127.0.0.1:8000/redoc
+```
+
 ---
 
 ## 📌 Endpoints
 
 ### 📚 Books
 
-| Method | Endpoint              | Description                          |
-|:------:|----------------------|--------------------------------------|
-| POST   | `/books`             | Create a new book                    |
-| POST   | `/books/bulk`        | Bulk create multiple books           |
-| GET    | `/books`             | Get books (filtering & pagination)   |
-| GET    | `/books/{id}`        | Get a single book by ID              |
-| PUT    | `/books/{id}`        | Update a book                        |
-| DELETE | `/books/{id}`        | Delete a book                        |
+| Method | Endpoint       | Description                        |
+|:------:|----------------|------------------------------------|
+| POST   | `/books`       | Create a new book *(admin only)*   |
+| POST   | `/books/bulk`  | Bulk create multiple books         |
+| GET    | `/books`       | Get books (filtering & pagination) |
+| GET    | `/books/{id}`  | Get a single book by ID            |
+| PUT    | `/books/{id}`  | Update a book *(admin only)*       |
+| DELETE | `/books/{id}`  | Delete a book *(admin only)*       |
 
 ### 🤖 AI-Powered Features
 
-| Method | Endpoint                    | Description                          |
-|:------:|----------------------------|--------------------------------------|
-| GET    | `/books/search`            | AI-powered book search by query      |
-| GET    | `/books/recommend`         | AI-powered book recommendations      |
-| GET    | `/books/summary/search`    | AI-generated book summaries (by ID or name) |
+| Method | Endpoint                 | Description                                  |
+|:------:|--------------------------|----------------------------------------------|
+| GET    | `/books/search`          | AI-powered book search by query              |
+| GET    | `/books/recommend`       | AI-powered book recommendations              |
+| GET    | `/books/summary/search`  | AI-generated book summaries (by ID or name)  |
 
 ---
 
 ## 🔍 Filtering & Pagination
+
 ### Pagination
 ```bash
 /books?limit=10&offset=0
 ```
+
 ### Filter by Author
 ```bash
 /books?author=Rowling
 ```
+
 ### Filter by Genre
 ```bash
 /books?genre=Fantasy
 ```
+
 ### Filter by Date Range (Flexible Formats)
 ```bash
 # Full date
@@ -164,12 +201,13 @@ http://127.0.0.1:8000
 # Year and month
 /books?start_date=2000-01&end_date=2020-12
 ```
+
 ### Sorting
 ```bash
 # Sort by name (ascending)
 /books?sort_by=name&order=asc
 
-# Sort by published date (descending - default)
+# Sort by published date (descending — default)
 /books?sort_by=published_date&order=desc
 
 # Sort by genre
@@ -178,10 +216,12 @@ http://127.0.0.1:8000
 # Available sort fields: name, author, published_date, genre
 # Available orders: asc, desc
 ```
+
 ### Combined Filters & Sorting
 ```bash
 /books?author=Rowling&genre=Fantasy&start_date=1997&end_date=2007&sort_by=name&order=asc&limit=5&offset=0
 ```
+
 ---
 
 ## 🤖 AI-Powered Features
@@ -199,7 +239,7 @@ GET /books/recommend?query="I want to learn programming"
 ```
 
 ### AI Book Summaries
-Generate engaging, story-like summaries of books:
+Generate engaging, story-like summaries of books.
 
 **By Book ID:**
 ```bash
@@ -221,8 +261,11 @@ GET /books/summary/search?name=harry%20potter
 }
 ```
 
+---
+
 ## ⚡ Bulk Insert Example
-```bash
+
+```json
 {
   "books": [
     {
@@ -242,32 +285,36 @@ GET /books/summary/search?name=harry%20potter
   ]
 }
 ```
+
 ---
 
 ## 🧪 Running Tests
+
 ```bash
 pytest -v
 ```
+
 ---
 
 ## 🧩 Error Handling
-Centralized using service wrappers
-Consistent API responses
+
+Centralized using service wrappers; consistent API responses.
 
 Handles:
 
-❌ 404 Not Found
-⚠️ 400 Bad Request
-💥 500 Internal Errors
+- ❌ `404` Not Found
+- ⚠️ `400` Bad Request
+- 💥 `500` Internal Errors
 
 ---
 
 ## 💡 Key Learnings
+
 - Async FastAPI architecture
 - SQLAlchemy async queries
 - Clean backend layering
 - Pagination & filtering patterns
-- **Advanced sorting with SQLAlchemy order_by()**
+- **Advanced sorting with SQLAlchemy `order_by()`**
 - **Flexible date parsing (year/month/day support)**
 - Bulk data handling
 - Pydantic v2 migration
@@ -279,28 +326,36 @@ Handles:
 ---
 
 ## 🔮 Future Improvements
+
 - ✅ **AI-Powered Search** (Implemented)
 - ✅ **AI Recommendations** (Implemented)
 - ✅ **AI Book Summaries** (Implemented)
 - ✅ **Advanced Sorting** (Implemented)
+- ✅ **Docker Support** (Implemented)
 - 🔐 Authentication & authorization
 - 🔍 Advanced full-text search
-- 🐳 Docker support
 - ⚙️ CI/CD pipeline
-- 🤝 Contributions
----
-## Contributions are welcome!
 
-### Fork → Create branch → Commit → PR 🚀
 ---
-# ⭐ Final Note
+
+## 🤝 Contributions
+
+Contributions are welcome!
+
+**Fork → Create branch → Commit → PR 🚀**
+
+---
+
+## ⭐ Final Note
 
 This project demonstrates a production-ready backend structure using modern async Python tools, now enhanced with **cutting-edge AI capabilities** for intelligent book discovery and content generation.
 
 🚀 Built with passion using FastAPI & Groq AI
 
 ---
-# BOOKS in DATABASE
+
+## 📖 Books in Database
+
 - Atomic Habits
 - The Alchemist
 - Harry Potter and the Sorcerer's Stone
