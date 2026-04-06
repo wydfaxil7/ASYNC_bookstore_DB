@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Recommendations | ASYNC Bookstore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/ui/css/styles.css" />
+  </head>
+  <body class="post-login-body page-ai-recommendations">
+    <div class="bg-grid"></div>
+    <header class="site-header container">
+      <a class="brand" href="/ui/dashboard">ASYNC Bookstore</a>
+      <nav>
+        <a href="/ui/books/ai-search">AI Search</a>
+        <a href="/ui/books/ai-summary">AI Summary</a>
+        <a href="/ui/profile">Profile</a>
+        <a href="#" class="logout-link">Logout</a>
+      </nav>
+    </header>
+
+    <main class="container page-shell">
+      <section class="panel dashboard-hero reveal">
+        <div>
+          <p class="kicker">AI FEATURED</p>
+          <h1 class="dash-title">Personalized Recommendations</h1>
+          <p class="muted">Get recommendations based on a book title and browse them as featured cards.</p>
+        </div>
+        <img class="ai-banner" src="/static/ui/assets/ai-books.svg" alt="AI and books illustration" />
+      </section>
+
+      <section class="panel reveal">
+        <div class="section-head">
+          <h2>Recommendation Query</h2>
+          <span class="badge badge-ai">Books from AI</span>
+        </div>
+        <form id="recommendForm" class="stack">
+          <input type="text" id="title" placeholder="Enter book title" />
+          <div class="row-wrap">
+            <input type="number" id="limit" value="20" min="1" />
+            <input type="number" id="offset" value="0" min="0" readonly />
+          </div>
+          <button type="submit" class="btn">Get Recommendations</button>
+        </form>
+      </section>
+
+      <section class="page-grid-2">
+        <article class="panel reveal delay-1">
+          <h2>Recommendation Notes</h2>
+          <div id="recommendMeta" class="section-stack"></div>
+        </article>
+        <article class="panel reveal delay-1">
+          <h2>Recommended Books</h2>
+          <div id="recommendResults" class="book-grid"></div>
+          <div id="recommendPagination"></div>
+        </article>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="/static/ui/js/common.js"></script>
+    <script src="/static/ui/js/books-ai-recommendations.js"></script>
+  </body>
+</html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Summary | ASYNC Bookstore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/ui/css/styles.css" />
+  </head>
+  <body class="post-login-body page-ai-summary">
+    <div class="bg-grid"></div>
+    <header class="site-header container">
+      <a class="brand" href="/ui/dashboard">ASYNC Bookstore</a>
+      <nav>
+        <a href="/ui/books/ai-search">AI Search</a>
+        <a href="/ui/books/ai-recommendations">AI Recommendations</a>
+        <a href="/ui/profile">Profile</a>
+        <a href="#" class="logout-link">Logout</a>
+      </nav>
+    </header>
+
+    <main class="container page-shell">
+      <section class="panel dashboard-hero reveal">
+        <div>
+          <p class="kicker">AI FEATURED</p>
+          <h1 class="dash-title">Story-like Summaries</h1>
+          <p class="muted">Generate readable summaries for one book at a time using ID or name.</p>
+        </div>
+        <img class="ai-banner" src="/static/ui/assets/ai-books.svg" alt="AI and books illustration" />
+      </section>
+
+      <section class="panel reveal">
+        <div class="section-head">
+          <h2>Summary Query</h2>
+          <span class="badge badge-ai">Narrative</span>
+        </div>
+        <form id="summaryForm" class="stack">
+          <div class="row-wrap">
+            <input type="number" id="summaryId" min="1" placeholder="Book ID" />
+            <input type="text" id="summaryName" placeholder="Book name" />
+          </div>
+          <button type="submit" class="btn">Generate Summary</button>
+        </form>
+      </section>
+
+      <section class="page-grid-2">
+        <article class="panel reveal delay-1">
+          <h2>Summary</h2>
+          <div id="summaryResult" class="section-stack"></div>
+        </article>
+        <article class="panel reveal delay-1">
+          <h2>Prompt Result</h2>
+          <div id="summaryHint" class="section-stack">
+            <div class="note-card">
+              <p class="kicker">TIP</p>
+              <h3 class="note-title">Search by ID for exact matches, or by name for partial matches.</h3>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="/static/ui/js/common.js"></script>
+    <script src="/static/ui/js/books-ai-summary.js"></script>
+  </body>
+</html>

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Books | ASYNC Bookstore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/ui/css/styles.css" />
+  </head>
+  <body class="post-login-body page-write">
+    <div class="bg-grid"></div>
+    <header class="site-header container">
+      <a class="brand" href="/ui/dashboard">ASYNC Bookstore</a>
+      <nav>
+        <a href="/ui/books/view">Get Books</a>
+        <a href="/ui/books/search">Search</a>
+        <a href="/ui/books/ai-search">AI Search</a>
+        <a href="/ui/profile">Profile</a>
+        <a href="#" class="logout-link">Logout</a>
+      </nav>
+    </header>
+
+    <main class="container page-shell">
+      <section class="panel dashboard-hero reveal">
+        <div>
+          <p class="kicker">WRITE OPERATIONS</p>
+          <h1 class="dash-title">Create and Bulk Create</h1>
+          <p class="muted">Single book creation and bulk insertion live on the same page so you can manage write operations together.</p>
+        </div>
+        <img src="/static/ui/assets/bookstore-hero.svg" alt="Bookstore shelf illustration" />
+      </section>
+
+      <section class="page-grid-2">
+        <article class="panel reveal">
+          <div class="section-head">
+            <h2>Create Single Book</h2>
+            <span class="badge">Admin</span>
+          </div>
+          <form id="singleBookForm" class="stack">
+            <input type="text" id="bookName" placeholder="Name" required />
+            <input type="text" id="bookAuthor" placeholder="Author" required />
+            <input type="text" id="bookGenre" placeholder="Genre" />
+            <input type="date" id="bookDate" />
+            <textarea id="bookDescription" rows="4" placeholder="Description"></textarea>
+            <button type="submit" class="btn">Create Book</button>
+          </form>
+        </article>
+
+        <article class="panel reveal delay-1">
+          <div class="section-head">
+            <h2>Bulk Create Books</h2>
+            <span class="badge badge-ai">Batch</span>
+          </div>
+          <form id="bulkBookForm" class="stack">
+            <textarea id="bulkBooksJson" rows="14" spellcheck="false"></textarea>
+            <button type="submit" class="btn">Create Bulk</button>
+          </form>
+        </article>
+      </section>
+
+      <section class="panel reveal delay-2">
+        <div class="row-space">
+          <h2>Created Books Preview</h2>
+          <span id="createStatus" class="muted">Waiting for input</span>
+        </div>
+        <div id="createdBooksGrid" class="book-grid"></div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="/static/ui/js/common.js"></script>
+    <script src="/static/ui/js/books-write.js"></script>
+  </body>
+</html>

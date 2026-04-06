@@ -9,11 +9,11 @@
     }
 
     try {
-      const res = await api("/auth/me");
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.detail || "Failed to load profile");
+      const data = await fetchCurrentUser(true);
+      if (!data) {
+        throw new Error("Failed to load profile");
       }
+      applyRoleVisibility(Boolean(data.is_admin));
       output.textContent = JSON.stringify(data, null, 2);
     } catch (error) {
       output.textContent = "Could not load profile.";
@@ -24,7 +24,7 @@
   refreshBtn.addEventListener("click", loadProfile);
 
   logoutBtn.addEventListener("click", () => {
-    setToken("");
+    clearSession();
     toast("Logged out");
     setTimeout(() => {
       window.location.href = "/ui/login";

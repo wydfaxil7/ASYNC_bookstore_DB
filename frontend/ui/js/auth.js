@@ -25,6 +25,7 @@
         }
 
         setToken(data.access_token);
+        await fetchCurrentUser(true);
         toast("Login successful");
         setTimeout(() => {
           window.location.href = "/ui/dashboard";

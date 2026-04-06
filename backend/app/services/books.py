@@ -161,7 +161,7 @@ async def search_book_service(db: AsyncSession,
                               genre: str | None,
                               limit : int,
                               offset: int
-                              ) -> List[Book]:
+                              ) -> BookListResponse:
     """
     Handles searching books with filter and pagination
     """
@@ -169,7 +169,16 @@ async def search_book_service(db: AsyncSession,
     if limit > 100:
         raise HTTPException(status_code=400, detail="Limit too large (max 100)")
 
-    return await repo.search_book(db, q, genre, limit, offset)
+    books, total = await repo.search_book(db, q, genre, limit, offset)
+    books_data = [BookResponse.model_validate(book) for book in books]
+
+    return BookListResponse(
+        total=total,
+        limit=limit,
+        offset=offset,
+        data=books_data,
+        message="No Data found" if not books_data else "Search results fetched successfully",
+    )
 
 @serv_wrapper
 async def get_book_summary_service(db: AsyncSession, book_id: int) -> dict:
