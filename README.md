@@ -2,6 +2,8 @@
 
 Async FastAPI bookstore API + modular frontend UI.
 
+Now includes BookGPT chatbot support with database-grounded responses.
+
 Project is split into:
 
 - `backend/` for API, business logic, and tests
@@ -39,13 +41,15 @@ BOOKSTORE_DB/
 │   │   │   └── security.py
 │   │   ├── routers/
 │   │   │   ├── auth.py
-│   │   │   └── books.py
+│   │   │   ├── books.py
+│   │   │   └── chat.py
 │   │   ├── services/
 │   │   │   ├── ai.py
 │   │   │   ├── ai_prompts.py
 │   │   │   ├── auth.py
 │   │   │   ├── auth_service.py
-│   │   │   └── books.py
+│   │   │   ├── books.py
+│   │   │   └── chatbot.py
 │   │   └── utils/
 │   │       ├── groq_client.py
 │   │       └── wrappers.py
@@ -62,6 +66,7 @@ BOOKSTORE_DB/
 		│   └── styles.css
 		├── js/
 		│   ├── auth.js
+		│   ├── chatbot.js
 		│   ├── common.js
 		│   ├── dashboard.js
 		│   ├── profile.js
@@ -72,6 +77,7 @@ BOOKSTORE_DB/
 		│   ├── books-ai-summary.js
 		│   └── books-ai-recommendations.js
 		└── pages/
+			├── chatbot.html
 			├── landing.html
 			├── login.html
 			├── register.html
@@ -106,6 +112,8 @@ docker compose up --build
 - API root: `http://127.0.0.1:8000/`
 - UI landing: `http://127.0.0.1:8000/ui`
 - Dashboard: `http://127.0.0.1:8000/ui/dashboard`
+- BookGPT UI: `http://127.0.0.1:8000/ui/chatbot`
+- Chat API: `http://127.0.0.1:8000/chat`
 - Swagger: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
 
@@ -115,6 +123,7 @@ docker compose up --build
 - `/ui/login`
 - `/ui/register`
 - `/ui/dashboard`
+- `/ui/chatbot`
 - `/ui/profile`
 - `/ui/books/write`
 - `/ui/books/view`
@@ -126,3 +135,14 @@ docker compose up --build
 ## Backend Docs
 
 Detailed API/service notes are available in `backend/README.md`.
+
+## BookGPT Chatbot
+
+- Endpoint: `POST /chat`
+- Auth: protected route (Bearer JWT required)
+- Grounding: checks real bookstore catalog before LLM response generation
+- Supports:
+	- exact store count queries
+	- direct book-id lookup
+	- fuzzy catalog search for typo-tolerant user input
+- Response includes diagnostics such as `lookup_mode`, `matched_books_count`, and `store_book_count`.
