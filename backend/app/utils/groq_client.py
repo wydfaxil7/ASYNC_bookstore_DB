@@ -6,6 +6,10 @@ from groq import Groq
 import asyncio
 from typing import Dict, Any, Optional
 
+GROQ_CHAT_MODEL = os.getenv("GROQ_CHAT_MODEL", "llama-3.1-8b-instant")
+GROQ_SEARCH_MODEL = "llama-3.1-8b-instant"
+GROQ_DEFAULT_MODEL = GROQ_SEARCH_MODEL
+
 def get_groq_client() -> Groq:
     """Get Groq client with lazy initialization."""
     api_key = os.getenv("GROQ_API_KEY")
@@ -13,7 +17,7 @@ def get_groq_client() -> Groq:
         raise ValueError("GROQ_API_KEY environment variable is not set")
     return Groq(api_key=api_key)
 
-async def call_groq(prompt: str, timeout: int = 10) -> str:
+async def call_groq(prompt: str, timeout: int = 10, model: str = GROQ_DEFAULT_MODEL) -> str:
     """
     Async wrapper for Groq API with timeout handling.
     
@@ -24,10 +28,10 @@ async def call_groq(prompt: str, timeout: int = 10) -> str:
     Returns:
         Raw response text from the model
     """
-    def _call():
+    def _call(selected_model: str):
         client = get_groq_client()
         response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model=selected_model,
             messages=[
                 {"role": "system", "content": "You are a helpful assistant. Respond with valid JSON when requested."},
                 {"role": "user", "content": prompt}
@@ -37,7 +41,13 @@ async def call_groq(prompt: str, timeout: int = 10) -> str:
         )
         return response.choices[0].message.content
 
-    return await asyncio.to_thread(_call)
+    try:
+        return await asyncio.to_thread(_call, model)
+    except Exception as exc:
+        # If a selected model is deprecated/decommissioned, retry once with the stable fallback.
+        if model != GROQ_SEARCH_MODEL and "model_decommissioned" in str(exc):
+            return await asyncio.to_thread(_call, GROQ_SEARCH_MODEL)
+        raise
 
 
 def extract_json_from_response(response_text: str) -> Optional[Dict[str, Any]]:

@@ -1,6 +1,6 @@
 # schemas.py
-from pydantic import BaseModel, ConfigDict, EmailStr
-from datetime import date, datetime
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from datetime import date, datetime, timezone
 from typing import List
 
 class BookBase(BaseModel):
@@ -91,3 +91,36 @@ class TokenData(BaseModel):
     username: str | None = None
     is_admin: bool | None = None
     exp: datetime | None = None
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ChatRequest(BaseModel):
+    message: str = Field(
+        ...,
+        min_length=1,
+        max_length=2000,
+        description="User message sent to chatbot.",
+        examples=["Recommend a fantasy book with strong world-building."]
+    )
+    history_limit: int = Field(
+        default=10,
+        ge=1,
+        le=20,
+        description="How many recent messages to include as context.",
+        examples=[10]
+    )
+
+class ChatResponse(BaseModel):
+    user_id: int
+    message: str
+    reply: str
+    context_used: List[ChatMessage] = Field(default_factory=list)
+    message_count: int = 0
+    store_book_count: int | None = None
+    matched_books_count: int = 0
+    lookup_mode: str | None = None
+    model_config = ConfigDict(from_attributes=True)
+ 

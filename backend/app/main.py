@@ -4,11 +4,13 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from app.routers import books, auth
+from app.routers import books, auth, chat
 from app.database import engine, Base
 
 app = FastAPI()
 app.include_router(auth.router)
+app.include_router(chat.router)
+app.include_router(books.router)
 
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR.parent.parent / "frontend"
@@ -26,8 +28,6 @@ async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     print("Tables are ready")
-
-app.include_router(books.router)
 
 @app.get("/")
 async def root():
@@ -87,6 +87,11 @@ async def frontend_books_ai_summary():
 @app.get("/ui/books/ai-recommendations", include_in_schema=False)
 async def frontend_books_ai_recommendations():
     return _ui_file("books-ai-recommendations.html")
+
+
+@app.get("/ui/chatbot", include_in_schema=False)
+async def frontend_chatbot():
+    return _ui_file("chatbot.html")
 
 
 @app.get("/ui/profile", include_in_schema=False)

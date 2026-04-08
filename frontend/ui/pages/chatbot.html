@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BookGPT | ASYNC Bookstore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Unbounded:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/ui/css/styles.css" />
+  </head>
+  <body class="post-login-body page-chatbot">
+    <div class="bg-grid"></div>
+    <header class="site-header container">
+      <a class="brand" href="/ui/dashboard">ASYNC Bookstore</a>
+      <nav>
+        <a href="/ui/dashboard">Dashboard</a>
+        <a href="/ui/books/view">View</a>
+        <a href="/ui/books/search">Search</a>
+        <a href="/ui/books/ai-search">AI Search</a>
+        <a href="/ui/chatbot" class="pill">BookGPT</a>
+        <a href="/ui/profile">Profile</a>
+        <a href="#" class="logout-link">Logout</a>
+      </nav>
+    </header>
+
+    <main class="container page-shell">
+      <section class="panel reveal">
+        <div class="section-head">
+          <div>
+            <p class="kicker">BOOKGPT</p>
+            <h1 class="dash-title">BookGPT Assistant</h1>
+            <p class="muted">Ask about books, genres, and recommendations in natural language.</p>
+          </div>
+          <div class="chat-controls">
+            <label>
+              Context window
+              <select id="historyLimit">
+                <option value="5">5 messages</option>
+                <option value="10" selected>10 messages</option>
+                <option value="15">15 messages</option>
+              </select>
+            </label>
+            <button class="btn ghost" type="button" id="clearChatBtn">Clear Screen</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel reveal delay-1 chat-shell">
+        <div id="chatFeed" class="chat-feed" aria-live="polite"></div>
+
+        <div class="quick-row" id="quickRow">
+          <button class="quick-chip" type="button" data-prompt="Recommend fantasy books like Harry Potter.">Fantasy ideas</button>
+          <button class="quick-chip" type="button" data-prompt="Suggest 3 self-help books for productivity.">Productivity picks</button>
+          <button class="quick-chip" type="button" data-prompt="Which thriller books are available in this store?">Available thrillers</button>
+        </div>
+
+        <form id="chatForm" class="chat-form">
+          <label class="sr-only" for="chatInput">Message</label>
+          <textarea
+            id="chatInput"
+            rows="3"
+            maxlength="2000"
+            placeholder="Ask BookGPT anything about books..."
+            required
+          ></textarea>
+          <button class="btn" type="submit" id="sendBtn">Send</button>
+        </form>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="/static/ui/js/common.js"></script>
+    <script src="/static/ui/js/chatbot.js"></script>
+  </body>
+</html>
