@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Book
 from sqlalchemy import or_, func, and_, asc, desc
 from datetime import date
+from difflib import SequenceMatcher
+import re
 
 from typing import List
 
@@ -30,7 +32,6 @@ async def create_bulk_books(db: AsyncSession, books_data: List[dict]):
         await db.refresh(book)
 
     return db_books
-    
 
 async def get_books(db: AsyncSession) -> List[Book]:
     """
@@ -38,6 +39,102 @@ async def get_books(db: AsyncSession) -> List[Book]:
     """
     result = await db.execute(select(Book))
     return result.scalars().all()
+
+
+
+async def get_books_count(db: AsyncSession) -> int:
+    """
+    Return exact total number of books in DB
+    """
+    result = await db.execute(select(func.count()).select_from(Book))
+    return int(result.scalar() or 0)
+
+def _normalize_chat_text(value: str) -> str:
+    """
+    Normalize text for fuzzy matching.
+    """
+    value = value.lower()
+    # Keep letters/numbers/spaces and remove punctuation noise.
+    value = re.sub(r"[^a-z0-9\s]", " ", value)
+    return " ".join(value.split())
+
+
+def _informative_tokens(text: str) -> set[str]:
+    """
+    Extract meaningful tokens by removing common filler words.
+    """
+    stopwords = {
+        "a", "an", "the", "do", "does", "did", "we", "you", "have", "has", "had",
+        "is", "are", "was", "were", "in", "on", "of", "for", "to", "with", "by",
+        "please", "can", "could", "would", "should", "tell", "me", "about", "book", "books",
+        "any", "there", "our", "store", "catalog", "current", "find", "search"
+    }
+    return {token for token in text.split() if token and token not in stopwords}
+
+
+def _token_fuzzy_overlap_score(query_tokens: set[str], book_tokens: set[str]) -> float:
+    """
+    Score typo-tolerant overlap between query tokens and book tokens.
+    """
+    if not query_tokens or not book_tokens:
+        return 0.0
+
+    matched = 0
+    for q in query_tokens:
+        best = 0.0
+        for b in book_tokens:
+            best = max(best, SequenceMatcher(None, q, b).ratio())
+        if best >= 0.78:
+            matched += 1
+
+    return matched / max(len(query_tokens), 1)
+
+def _chat_match_score(query: str, book: Book) -> float:
+    """
+    Score how well a book matches a human query using fuzzy matching on title and description.
+    """
+    query_norm = _normalize_chat_text(query)
+    title_norm = _normalize_chat_text(book.name)
+    author_norm = _normalize_chat_text(book.author)
+
+    # Strong boost for obvious contains matches.
+    if query_norm and (query_norm in title_norm or query_norm in author_norm):
+        return 1.0
+
+    seq_score = max(
+        SequenceMatcher(None, query_norm, title_norm).ratio(),
+        SequenceMatcher(None, query_norm, author_norm).ratio()
+    )
+
+    query_tokens = _informative_tokens(query_norm)
+    book_tokens = _informative_tokens(title_norm + " " + author_norm)
+
+    overlap_score = len(query_tokens & book_tokens) / max(len(query_tokens), 1)
+    fuzzy_overlap_score = _token_fuzzy_overlap_score(query_tokens, book_tokens)
+
+    return max(seq_score, overlap_score, fuzzy_overlap_score)
+
+async def search_books_for_chat(
+    db: AsyncSession,
+    query: str,
+    limit: int = 5
+) -> list[Book]:
+    
+    """
+    Search books using fuzzy matching for chatbot context. This is a more flexible search that tries to find relevant books even if the query doesn't exactly match titles/authors. It uses a combination of sequence matching and token overlap to score relevance, and returns the top results.
+    """
+    books = await get_books(db)
+    scored_books: list[tuple[float, Book]] = []
+
+    for book in books:
+        score = _chat_match_score(query, book)
+        if score >= 0.35:
+            scored_books.append((score, book))
+
+    scored_books.sort(key=lambda item: item[0], reverse=True)
+    return [book for _, book in scored_books[:limit]]
+
+
 
 async def get_book(db: AsyncSession, book_id: int) -> Book | None:
     """

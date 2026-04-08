@@ -24,6 +24,7 @@ Designed with a **clean layered architecture** to ensure scalability, maintainab
   - **AI Book Search** — Natural language book discovery
   - **AI Recommendations** — Personalized book suggestions
   - **AI Summaries** — Story-like book summaries using Groq AI
+  - **BookGPT Chatbot** — Contextual chat grounded on real store data
 - 🧠 Pydantic v2 schemas (`model_dump`, `from_attributes`)
 - 🛡️ Centralized error handling using wrappers
 - 📘 Auto-generated API docs (Swagger & ReDoc)
@@ -41,9 +42,11 @@ BOOKSTORE_DB/
 │   ├── services/
 │   │   ├── books.py
 │   │   ├── ai.py          # AI service functions
-│   │   └── ai_prompts.py  # AI prompt templates
+│   │   ├── ai_prompts.py  # AI prompt templates
+│   │   └── chatbot.py     # BookGPT service logic
 │   ├── routers/
-│   │   └── books.py
+│   │   ├── books.py
+│   │   └── chat.py
 │   ├── utils/
 │   │   ├── wrappers.py
 │   │   └── groq_client.py # Groq AI client
@@ -170,6 +173,33 @@ http://127.0.0.1:8000
 | GET    | `/books/search`          | AI-powered book search by query              |
 | GET    | `/books/recommend`       | AI-powered book recommendations              |
 | GET    | `/books/summary/search`  | AI-generated book summaries (by ID or name)  |
+| POST   | `/chat`                  | BookGPT chat with DB-grounded context        |
+
+### 💬 BookGPT Chat
+
+`POST /chat` accepts a user message plus an optional history window, then routes requests through three lookup modes before general generation:
+
+- `store_count`: answers exact count questions from database
+- `exact_book_id`: resolves direct ID queries such as "book id 3"
+- `catalog_search`: fuzzy-matches titles/authors for typo-tolerant grounding
+
+If no catalog match is found, it falls back to `general_answer` while preserving conversation context.
+
+Request body example:
+
+```json
+{
+  "message": "do we have the boyfreind?",
+  "history_limit": 10
+}
+```
+
+Response highlights:
+
+- `reply`: assistant response text
+- `lookup_mode`: which logic path answered
+- `matched_books_count`: number of catalog matches used
+- `store_book_count`: returned for count-oriented questions
 
 ---
 
