@@ -25,6 +25,10 @@ Designed with a **clean layered architecture** to ensure scalability, maintainab
   - **AI Recommendations** — Personalized book suggestions
   - **AI Summaries** — Story-like book summaries using Groq AI
   - **BookGPT Chatbot** — Contextual chat grounded on real store data
+- 🛒 **Cart Management:**
+  - Add/update/delete/clear user cart items
+  - Quantity-aware cart totals
+  - Inventory-aware stock reservation and release
 - 🧠 Pydantic v2 schemas (`model_dump`, `from_attributes`)
 - 🛡️ Centralized error handling using wrappers
 - 📘 Auto-generated API docs (Swagger & ReDoc)
@@ -38,11 +42,17 @@ Designed with a **clean layered architecture** to ensure scalability, maintainab
 BOOKSTORE_DB/
 ├── app/
 │   ├── Repository/
-│   │   └── books.py
+│   │   ├── books.py
+│   │   └── carts.py
 │   ├── services/
 │   │   ├── books.py
 │   │   ├── ai.py          # AI service functions
 │   │   ├── ai_prompts.py  # AI prompt templates
+│   │   ├── chatbot.py     # BookGPT service logic
+│   │   └── carts.py       # Cart service logic
+│   ├── routers/
+│   │   ├── books.py
+│   │   ├── carts.py
 │   │   └── chatbot.py     # BookGPT service logic
 │   ├── routers/
 │   │   ├── books.py
@@ -201,6 +211,22 @@ Response highlights:
 - `matched_books_count`: number of catalog matches used
 - `store_book_count`: returned for count-oriented questions
 
+### 🛒 Cart
+
+| Method | Endpoint                | Description                                |
+|:------:|-------------------------|--------------------------------------------|
+| POST   | `/carts/add`            | Add a book to cart                         |
+| GET    | `/carts`                | Get current user's cart                    |
+| PUT    | `/carts/update/{id}`    | Update item quantity                       |
+| DELETE | `/carts/delete/{id}`    | Delete an item from cart                   |
+| DELETE | `/carts/clear`          | Clear all items in current user's cart     |
+
+Notes:
+
+- Cart operations are user-scoped via JWT auth.
+- Cart totals include `total_items` and `total_price`.
+- Book stock is adjusted on add/update/delete/clear cart operations.
+
 ---
 
 ## 🔍 Filtering & Pagination
@@ -352,6 +378,11 @@ Handles:
 - **Natural Language Processing for search**
 - **Prompt engineering for AI responses**
 - **Error handling for external API calls**
+- **Inventory-aware cart logic (reserve/release stock with quantity deltas)**
+- **State consistency across cart add/update/delete/clear flows**
+- **Auth-scoped customer operations for cart endpoints**
+- **Schema evolution handling for existing DB tables (ALTER TABLE for new columns)**
+- **Frontend/Backend contract design for diagnostics and totals (`lookup_mode`, `total_price`)**
 
 ---
 
@@ -362,9 +393,14 @@ Handles:
 - ✅ **AI Book Summaries** (Implemented)
 - ✅ **Advanced Sorting** (Implemented)
 - ✅ **Docker Support** (Implemented)
-- 🔐 Authentication & authorization
-- 🔍 Advanced full-text search
-- ⚙️ CI/CD pipeline
+- ✅ **JWT Authentication & authorization** (Implemented)
+- ✅ **BookGPT DB-grounded chat** (Implemented)
+- ✅ **Cart API with inventory updates** (Implemented)
+- 🔍 Advanced full-text search / trigram indexing
+- 🧾 Order and checkout persistence (orders, order-items, payment states)
+- 🧠 Recommendation personalization using user/cart history
+- ⚙️ CI/CD pipeline with migration checks and integration tests
+- 📈 Monitoring and structured logging dashboards
 
 ---
 
