@@ -3,6 +3,7 @@
 Async FastAPI bookstore API + modular frontend UI.
 
 Now includes BookGPT chatbot support with database-grounded responses.
+Now includes cart management, inventory-aware stock handling, and storefront pages.
 
 Project is split into:
 
@@ -35,6 +36,7 @@ BOOKSTORE_DB/
 │   │   ├── schemas.py
 │   │   ├── Repository/
 │   │   │   ├── books.py
+│   │   │   ├── carts.py
 │   │   │   └── users.py
 │   │   ├── dependencies/
 │   │   │   ├── auth_dependencies.py
@@ -42,6 +44,7 @@ BOOKSTORE_DB/
 │   │   ├── routers/
 │   │   │   ├── auth.py
 │   │   │   ├── books.py
+│   │   │   ├── carts.py
 │   │   │   └── chat.py
 │   │   ├── services/
 │   │   │   ├── ai.py
@@ -49,6 +52,7 @@ BOOKSTORE_DB/
 │   │   │   ├── auth.py
 │   │   │   ├── auth_service.py
 │   │   │   ├── books.py
+│   │   │   ├── carts.py
 │   │   │   └── chatbot.py
 │   │   └── utils/
 │   │       ├── groq_client.py
@@ -66,6 +70,7 @@ BOOKSTORE_DB/
 		│   └── styles.css
 		├── js/
 		│   ├── auth.js
+		│   ├── cart-ui.js
 		│   ├── chatbot.js
 		│   ├── common.js
 		│   ├── dashboard.js
@@ -75,8 +80,12 @@ BOOKSTORE_DB/
 		│   ├── books-search.js
 		│   ├── books-ai-search.js
 		│   ├── books-ai-summary.js
-		│   └── books-ai-recommendations.js
+		│   ├── books-ai-recommendations.js
+		│   ├── product.js
+		│   └── shop.js
 		└── pages/
+			├── product.html
+			├── shop.html
 			├── chatbot.html
 			├── landing.html
 			├── login.html
@@ -113,7 +122,10 @@ docker compose up --build
 - UI landing: `http://127.0.0.1:8000/ui`
 - Dashboard: `http://127.0.0.1:8000/ui/dashboard`
 - BookGPT UI: `http://127.0.0.1:8000/ui/chatbot`
+- Shop UI: `http://127.0.0.1:8000/ui/shop`
+- Product UI: `http://127.0.0.1:8000/ui/product?id=1`
 - Chat API: `http://127.0.0.1:8000/chat`
+- Cart API base: `http://127.0.0.1:8000/carts`
 - Swagger: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
 
@@ -124,6 +136,8 @@ docker compose up --build
 - `/ui/register`
 - `/ui/dashboard`
 - `/ui/chatbot`
+- `/ui/shop`
+- `/ui/product?id={book_id}`
 - `/ui/profile`
 - `/ui/books/write`
 - `/ui/books/view`
@@ -146,3 +160,10 @@ Detailed API/service notes are available in `backend/README.md`.
 	- direct book-id lookup
 	- fuzzy catalog search for typo-tolerant user input
 - Response includes diagnostics such as `lookup_mode`, `matched_books_count`, and `store_book_count`.
+
+## Cart And Inventory
+
+- Cart endpoints are available under `/carts`.
+- Supports add, get, update quantity, delete item, and clear cart actions.
+- Stock is inventory-aware and updates as cart quantities change.
+- Storefront includes quick-add modals, quantity steppers, and checkout-cart prompts.
