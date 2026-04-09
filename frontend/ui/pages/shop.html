@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop | ASYNC Bookstore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Unbounded:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/ui/css/styles.css" />
+  </head>
+  <body class="post-login-body page-shop">
+    <div class="bg-grid"></div>
+
+    <header class="site-header container">
+      <a class="brand" href="/ui/dashboard">ASYNC Bookstore</a>
+      <nav>
+        <a href="/ui/shop" class="pill">Shop</a>
+        <a href="#" class="cart-link" data-cart-open>
+          <span class="cart-icon">🛒</span>
+          <span>Cart</span>
+          <span class="cart-count" data-cart-count>0</span>
+        </a>
+        <a href="/ui/chatbot">BookGPT</a>
+        <a href="/ui/profile">Profile</a>
+        <a href="#" class="logout-link">Logout</a>
+      </nav>
+    </header>
+
+    <main class="container page-shell">
+      <section class="panel reveal shop-hero">
+        <div>
+          <p class="kicker">SHOP MODE</p>
+          <h1 class="dash-title">Find your next read</h1>
+          <p class="muted">
+            Explore books by authors and genres, view details, and add directly to cart.
+          </p>
+        </div>
+        <div class="shop-stats">
+          <article class="stat-card">
+            <p>Total Books</p>
+            <h3 id="totalBooks">0</h3>
+          </article>
+          <article class="stat-card">
+            <p>Total Cart Items</p>
+            <h3 id="totalCartItems">0</h3>
+          </article>
+        </div>
+      </section>
+
+      <section class="shop-layout reveal delay-1">
+        <aside class="panel shop-sidebar">
+          <h3>Sections</h3>
+          <p class="muted">Filter by author and genre</p>
+
+          <label class="field" for="searchInput">
+            <span>Search</span>
+            <input id="searchInput" placeholder="Title or author" />
+          </label>
+
+          <div class="section-block">
+            <div class="section-head-inline">
+              <h4>Authors</h4>
+              <span id="authorCount" class="badge">0</span>
+            </div>
+            <div id="authorsList" class="chip-list"></div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-head-inline">
+              <h4>Genres</h4>
+              <span id="genreCount" class="badge">0</span>
+            </div>
+            <div id="genresList" class="chip-list"></div>
+          </div>
+
+          <button id="clearFiltersBtn" class="btn ghost" type="button">Clear Filters</button>
+        </aside>
+
+        <section class="panel shop-content">
+          <div class="shop-toolbar">
+            <h2>Book Catalog</h2>
+            <p id="resultMeta" class="muted">0 items</p>
+          </div>
+          <div id="shopGrid" class="shop-grid"></div>
+        </section>
+      </section>
+    </main>
+
+    <a class="bookgpt-float" href="/ui/chatbot" title="Open BookGPT" aria-label="Open BookGPT">
+      <span>BookGPT</span>
+    </a>
+
+    <div id="toast" class="toast"></div>
+    <script src="/static/ui/js/common.js"></script>
+    <script src="/static/ui/js/cart-ui.js"></script>
+    <script src="/static/ui/js/shop.js"></script>
+  </body>
+</html>

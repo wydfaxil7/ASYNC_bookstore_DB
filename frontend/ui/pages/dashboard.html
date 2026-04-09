@@ -17,6 +17,12 @@
     <header class="site-header container">
       <a class="brand" href="/ui/dashboard">ASYNC Bookstore</a>
       <nav>
+        <a href="/ui/shop" class="pill">Shop</a>
+        <a href="#" class="cart-link" data-cart-open>
+          <span class="cart-icon">🛒</span>
+          <span>Cart</span>
+          <span class="cart-count" data-cart-count>0</span>
+        </a>
         <a class="admin-only" href="/ui/books/write">Write</a>
         <a class="admin-only" href="#" id="editBooksSecureBtn">Edit Books</a>
         <a href="/ui/books/view">View</a>
@@ -94,6 +100,16 @@
           <p class="muted">Focused search results with pretty card output.</p>
           <a class="btn" href="/ui/books/search">Open Search Page</a>
         </article>
+
+        <article class="panel reveal delay-1 cart-feature-card">
+          <p class="kicker">CART</p>
+          <h2>Checkout cart in a big card</h2>
+          <p class="muted">Open your cart drawer from here or from shop.</p>
+          <div class="cart-feature-row">
+            <span class="badge">Items: <strong data-cart-count>0</strong></span>
+            <button class="btn ghost" type="button" data-cart-open>Open Cart</button>
+          </div>
+        </article>
       </section>
 
       <section class="panel reveal delay-2">
@@ -128,6 +144,7 @@
 
     <div id="toast" class="toast"></div>
     <script src="/static/ui/js/common.js"></script>
+    <script src="/static/ui/js/cart-ui.js"></script>
     <script src="/static/ui/js/dashboard.js"></script>
   </body>
 </html>
