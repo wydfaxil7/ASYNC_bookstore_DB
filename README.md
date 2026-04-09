@@ -126,6 +126,7 @@ docker compose up --build
 - Product UI: `http://127.0.0.1:8000/ui/product?id=1`
 - Chat API: `http://127.0.0.1:8000/chat`
 - Cart API base: `http://127.0.0.1:8000/carts`
+- Chat API: `http://127.0.0.1:8000/chat`
 - Swagger: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
 

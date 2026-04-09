@@ -53,6 +53,9 @@ BOOKSTORE_DB/
 │   ├── routers/
 │   │   ├── books.py
 │   │   ├── carts.py
+│   │   └── chatbot.py     # BookGPT service logic
+│   ├── routers/
+│   │   ├── books.py
 │   │   └── chat.py
 │   ├── utils/
 │   │   ├── wrappers.py
