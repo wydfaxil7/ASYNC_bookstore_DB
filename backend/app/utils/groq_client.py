@@ -6,9 +6,13 @@ from groq import Groq
 import asyncio
 from typing import Dict, Any, Optional
 
-GROQ_CHAT_MODEL = os.getenv("GROQ_CHAT_MODEL", "llama-3.1-8b-instant")
-GROQ_SEARCH_MODEL = "llama-3.1-8b-instant"
-GROQ_DEFAULT_MODEL = GROQ_SEARCH_MODEL
+from app.services.ai_prompts import (
+    GROQ_CHAT_MODEL,
+    GROQ_DEFAULT_MODEL,
+    GROQ_REQUEST_TIMEOUT_SECONDS,
+    GROQ_SEARCH_MODEL,
+    GROQ_SYSTEM_PROMPT,
+)
 
 def get_groq_client() -> Groq:
     """Get Groq client with lazy initialization."""
@@ -17,7 +21,7 @@ def get_groq_client() -> Groq:
         raise ValueError("GROQ_API_KEY environment variable is not set")
     return Groq(api_key=api_key)
 
-async def call_groq(prompt: str, timeout: int = 10, model: str = GROQ_DEFAULT_MODEL) -> str:
+async def call_groq(prompt: str, timeout: int = GROQ_REQUEST_TIMEOUT_SECONDS, model: str = GROQ_DEFAULT_MODEL) -> str:
     """
     Async wrapper for Groq API with timeout handling.
     
@@ -33,7 +37,7 @@ async def call_groq(prompt: str, timeout: int = 10, model: str = GROQ_DEFAULT_MO
         response = client.chat.completions.create(
             model=selected_model,
             messages=[
-                {"role": "system", "content": "You are a helpful assistant. Respond with valid JSON when requested."},
+                {"role": "system", "content": GROQ_SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.2,
@@ -126,7 +130,7 @@ def extract_json_list_from_response(response_text: str) -> list[Dict[str, Any]]:
 
 async def call_groq_with_json_response(
     prompt: str,
-    timeout: int = 10,
+    timeout: int = GROQ_REQUEST_TIMEOUT_SECONDS,
     required_fields: Optional[list[str]] = None
 ) -> Optional[Dict[str, Any]]:
     """

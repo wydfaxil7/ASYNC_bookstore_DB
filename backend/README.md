@@ -113,10 +113,26 @@ Create a `.env` file:
 ```bash
 DATABASE_URL=postgresql+asyncpg://wydfaxil:Aprinov-1428@localhost:5433/bookstore
 GROQ_API_KEY=your_groq_api_key
+GROQ_CHAT_MODEL=llama-3.1-8b-instant
+GROQ_SEARCH_MODEL=llama-3.1-8b-instant
+GROQ_REQUEST_TIMEOUT_SECONDS=10
+GROQ_SYSTEM_PROMPT=your system prompt text
+BOOK_SEARCH_PROMPT_TEMPLATE=your search prompt template
+BOOK_RECOMMENDATION_PROMPT_TEMPLATE=your recommendation prompt template
+BOOK_CHAT_PROMPT_TEMPLATE=your chat prompt template
+BOOK_SUMMARY_PROMPT_TEMPLATE=your summary prompt template
+AI_SEARCH_TIMEOUT_SECONDS=5
+AI_RECOMMENDATION_TIMEOUT_SECONDS=5
+AI_SUMMARY_TIMEOUT_SECONDS=10
+CHAT_MEMORY_LIMIT=10
+CHAT_CATALOG_SEARCH_LIMIT=5
 SECRET_KEY=your_jwt_secret
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 REFRESH_TOKEN_EXPIRE_DAYS=7
 ```
+
+The AI prompt templates now live in environment variables so you can tune chatbot wording, search instructions, and timing without editing Python code.
+Use `[[placeholder]]` tokens inside the template values so Docker Compose does not treat them as interpolation variables.
 
 > ⚠️ Use `localhost:5433` for local Python runs.  
 > ⚠️ For Docker Compose, the `DATABASE_URL` should use `postgres:5432`.
