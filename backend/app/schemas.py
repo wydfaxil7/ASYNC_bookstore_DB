@@ -103,7 +103,7 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str = Field(
-        ...,
+        ..., #it means that this field is mandatory
         min_length=1,
         max_length=2000,
         description="User message sent to chatbot.",
