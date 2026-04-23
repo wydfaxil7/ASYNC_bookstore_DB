@@ -6,9 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.Repository import books as books_repo
 from app.schemas import ChatMessage, ChatRequest, ChatResponse
+from app.services.ai_prompts import CHAT_CATALOG_SEARCH_LIMIT, CHAT_MEMORY_LIMIT, build_chat_prompt
 from app.utils.groq_client import call_groq, GROQ_CHAT_MODEL
 
-CHAT_MEMORY_LIMIT = 10
 CHAT_MEMORY: Dict[int, Deque[ChatMessage]] = defaultdict(
     lambda: deque(maxlen = CHAT_MEMORY_LIMIT)
     )
@@ -93,7 +93,7 @@ def format_catalog_context(matched_books) -> str:
     return "\n".join(lines)
 
 
-async def fetch_catalog_context(db: AsyncSession, user_message: str, limit: int =5) -> List[dict]:
+async def fetch_catalog_context(db: AsyncSession, user_message: str, limit: int = CHAT_CATALOG_SEARCH_LIMIT) -> List[dict]:
     """
     Fetch a small set of relevant books from the bookstore DB to ground.
     """
@@ -119,54 +119,6 @@ async def fetch_catalog_context(db: AsyncSession, user_message: str, limit: int 
         )
 
     return context_rows
-
-def build_chat_prompt(
-        user_message: str,
-        context: List[ChatMessage],
-        total_books: int,
-        catalog_context: str) -> str:
-    """
-    Builds a  hybrid prompt for the AI model by combining:
-        -System instructions
-        -Recent context
-        -Current user message
-        -grounded on store catalog when available
-    """
-    # build conversation history block
-    history_block = ""
-    for msg in context: 
-        role_label = "User" if msg.role == "user" else "Assistant"
-        history_block += f"{role_label}: {msg.content}\n"
-
-
-    # Combining everything into one prompt
-    prompt = f"""You are BookGPT, the bookstore assistant.
-
-You have two responsibilities:
-1. Use STORE FACTS when the user asks about inventory, availability, authors, titles, genres, book IDs, or how many books exist.
-2. Answer GENERAL QUESTIONS normally when the question is not about current store data.
-
-Response policy:
-- If the user asks for exact store facts, use the database facts only.
-- If a book is not in the current catalog context, say it is not found in the current store catalog.
-- If the user uses a typo or paraphrase, infer the intended book or author from the closest catalog match.
-- Never claim a book exists in the store unless it appears in catalog context.
-- If the question is general knowledge, answer naturally and helpfully.
-- If the question is ambiguous, ask one short clarifying question.
-
-Total books in catalog:
-{total_books}
-
-CATALOG CONTEXT:
-{catalog_context}
-
-Previous conversation:
-{history_block}
-
-User: {user_message}
-Assistant:"""
-        
-    return prompt
 
 async def build_chat_turn(
         db: AsyncSession,
@@ -235,7 +187,7 @@ async def build_chat_turn(
             lookup_mode=lookup_mode,
         )
 
-    matched_books = await books_repo.search_books_for_chat(db, user_message, limit=5)
+    matched_books = await books_repo.search_books_for_chat(db, user_message, limit=CHAT_CATALOG_SEARCH_LIMIT)
     catalog_context = format_catalog_context(matched_books)
     prompt = build_chat_prompt(user_message, context, total_books, catalog_context)
 
@@ -254,7 +206,7 @@ async def build_chat_turn(
         lookup_mode="catalog_search" if matched_books else "general_answer",
     )
     
-    # catalog_context = await fetch_catalog_context(db, user_message, limit = 5)
+    # catalog_context = await fetch_catalog_context(db, user_message)
     # prompt = build_chat_prompt(user_message, context, catalog_context)
     
     # assistant_reply = await call_groq(prompt, model=GROQ_CHAT_MODEL)
