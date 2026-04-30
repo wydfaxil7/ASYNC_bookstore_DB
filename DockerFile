@@ -16,8 +16,7 @@ RUN apt-get update && apt-get install -y \
 # Install Poetry
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
-
-# Add Poetry to Path
+# Add Poetry to PATH
 ENV PATH="/root/.local/bin:$PATH"
 
 # Copy dependency files from backend for caching
@@ -34,5 +33,5 @@ COPY frontend /app/frontend
 # Expose fastapi port
 EXPOSE 8000
 
-# Run FastAPI
+# 11. Run FastAPI (DEV model, we will convert to production mode)
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

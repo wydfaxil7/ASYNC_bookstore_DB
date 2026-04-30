@@ -64,7 +64,6 @@ async def call_groq(
             )
         raise
 
-
 def extract_json_from_response(response_text: str) -> Optional[Dict[str, Any]]:
     """
     Safely extract and validate JSON from AI response.
@@ -121,7 +120,6 @@ async def call_groq_with_json_response(
         if not json_data or not isinstance(json_data,dict):
             return None
         
-        # Validate required fields
         if required_fields:
             if not validate_schema(json_data, required_fields):
                 return None
