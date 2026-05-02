@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product | ASYNC Bookstore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Unbounded:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/ui/css/styles.css" />
+  </head>
+  <body class="post-login-body page-product">
+    <div class="bg-grid"></div>
+
+    <header class="site-header container">
+      <a class="brand" href="/ui/dashboard">ASYNC Bookstore</a>
+      <nav>
+        <a href="/ui/shop" class="pill">Shop</a>
+        <a href="#" class="cart-link" data-cart-open>
+          <span class="cart-icon">🛒</span>
+          <span>Cart</span>
+          <span class="cart-count" data-cart-count>0</span>
+        </a>
+        <a href="/ui/chatbot">BookGPT</a>
+        <a href="/ui/profile">Profile</a>
+        <a href="#" class="logout-link">Logout</a>
+      </nav>
+    </header>
+
+    <main class="container page-shell">
+      <section class="panel reveal product-wrap" id="productWrap">
+        <p class="muted">Loading product...</p>
+      </section>
+    </main>
+
+    <a class="bookgpt-float" href="/ui/chatbot" title="Open BookGPT" aria-label="Open BookGPT">
+      <span>BookGPT</span>
+    </a>
+
+    <div id="toast" class="toast"></div>
+    <script src="/static/ui/js/common.js"></script>
+    <script src="/static/ui/js/cart-ui.js"></script>
+    <script src="/static/ui/js/product.js"></script>
+  </body>
+</html>

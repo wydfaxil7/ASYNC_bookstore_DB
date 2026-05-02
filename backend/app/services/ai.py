@@ -13,7 +13,13 @@ from app.utils.groq_client import (
     call_groq_with_json_response
 )
 from app.Repository import books as repo
-from app.services.ai_prompts import build_search_prompt, build_recommendation_prompt
+from app.services.ai_prompts import (
+    AI_RECOMMENDATION_TIMEOUT_SECONDS,
+    AI_SEARCH_TIMEOUT_SECONDS,
+    AI_SUMMARY_TIMEOUT_SECONDS,
+    build_search_prompt,
+    build_recommendation_prompt,
+)
 
 
 # HELPER FUNCTIONS FOR JSON EXTRACTION AND VALIDATION
@@ -99,7 +105,7 @@ async def ai_search_service(
     
     # Try AI extraction
     try:
-        response = await asyncio.wait_for(call_groq(prompt), timeout=5)
+        response = await asyncio.wait_for(call_groq(prompt), timeout=AI_SEARCH_TIMEOUT_SECONDS)
         print(f"🤖 AI Search Response: {response[:200]}...")
         
         filters = extract_json(response)
@@ -198,7 +204,7 @@ async def generate_summary(prompt: str) -> str:
         A story-like summary string
     """
     try:
-        response = await asyncio.wait_for(call_groq(prompt), timeout=10)
+        response = await asyncio.wait_for(call_groq(prompt), timeout=AI_SUMMARY_TIMEOUT_SECONDS)
         # Clean up the response - remove any markdown formatting
         summary = response.strip()
         if summary.startswith("```"):
@@ -255,7 +261,7 @@ async def ai_recommend_book_service(db: AsyncSession, query_title: str, limit: i
     message = "No recommendations found"
     
     try:
-        response = await asyncio.wait_for(call_groq(prompt), timeout=5)
+        response = await asyncio.wait_for(call_groq(prompt), timeout=AI_RECOMMENDATION_TIMEOUT_SECONDS)
         print(f"🤖 AI Recommendation Response: {response[:200]}...")
         
         filters = extract_json(response)

@@ -2,7 +2,8 @@
 
 Async FastAPI bookstore platform with JWT auth, cart management, AI-powered book tools, a browser UI, and a local Groq helper package.
 
-The repository now has three important pieces:
+Now includes BookGPT chatbot support with database-grounded responses.
+Now includes cart management, inventory-aware stock handling, and storefront pages.
 
 - `backend/` for the API, repositories, services, tests, and backend docs
 - `frontend/` for the static UI pages, JavaScript controllers, styles, and assets
@@ -19,16 +20,30 @@ BOOKSTORE_DB/
 │   │   ├── models.py
 │   │   ├── schemas.py
 │   │   ├── Repository/
+│   │   │   ├── books.py
+│   │   │   ├── carts.py
+│   │   │   └── users.py
 │   │   ├── dependencies/
 │   │   ├── routers/
+│   │   │   ├── auth.py
+│   │   │   ├── books.py
+│   │   │   ├── carts.py
+│   │   │   └── chat.py
 │   │   ├── services/
+│   │   │   ├── ai.py
+│   │   │   ├── ai_prompts.py
+│   │   │   ├── auth.py
+│   │   │   ├── auth_service.py
+│   │   │   ├── books.py
+│   │   │   ├── carts.py
+│   │   │   └── chatbot.py
 │   │   └── utils/
-│   ├── books.db
-│   ├── poetry.lock
-│   ├── pyproject.toml
-│   ├── pyrightconfig.json
-│   ├── requirements.txt
-│   └── README.md
+│   │       ├── groq_client.py
+│   │       └── wrappers.py
+│   └── tests/
+│       ├── __init__.py
+│       ├── test_auths.py
+│       └── test_books.py
 ├── frontend/
 │   └── ui/
 │       ├── assets/
@@ -98,6 +113,14 @@ The prompt template variables support `[[placeholder]]` tokens, which are replac
 
 API docs:
 
+- API root: `http://127.0.0.1:8000/`
+- UI landing: `http://127.0.0.1:8000/ui`
+- Dashboard: `http://127.0.0.1:8000/ui/dashboard`
+- BookGPT UI: `http://127.0.0.1:8000/ui/chatbot`
+- Shop UI: `http://127.0.0.1:8000/ui/shop`
+- Product UI: `http://127.0.0.1:8000/ui/product?id=1`
+- Chat API: `http://127.0.0.1:8000/chat`
+- Cart API base: `http://127.0.0.1:8000/carts`
 - Swagger: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
 
@@ -130,10 +153,10 @@ Frontend pages under `/ui`:
 - `/ui/login`
 - `/ui/register`
 - `/ui/dashboard`
-- `/ui/profile`
 - `/ui/chatbot`
 - `/ui/shop`
 - `/ui/product?id={book_id}`
+- `/ui/profile`
 - `/ui/books/write`
 - `/ui/books/edit`
 - `/ui/books/view`
@@ -150,3 +173,21 @@ Frontend pages under `/ui`:
 - `bookstore_backup.sql` is the current SQL backup artifact for the project.
 
 For backend implementation details, see `backend/README.md`.
+
+## BookGPT Chatbot
+
+- Endpoint: `POST /chat`
+- Auth: protected route (Bearer JWT required)
+- Grounding: checks real bookstore catalog before LLM response generation
+- Supports:
+- exact store count queries
+- direct book-id lookup
+- fuzzy catalog search for typo-tolerant user input
+- Response includes diagnostics such as `lookup_mode`, `matched_books_count`, and `store_book_count`.
+
+## Cart And Inventory
+
+- Cart endpoints are available under `/carts`.
+- Supports add, get, update quantity, delete item, and clear cart actions.
+- Stock is inventory-aware and updates as cart quantities change.
+- Storefront includes quick-add modals, quantity steppers, and checkout-cart prompts.

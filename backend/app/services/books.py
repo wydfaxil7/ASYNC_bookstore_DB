@@ -6,6 +6,7 @@ from app.Repository import books as repo
 from typing import List
 from app.models import Book
 from app.utils.wrappers import serv_wrapper
+from app.services.ai_prompts import build_summary_prompt
 from app.schemas import BookListResponse, BookResponse
 from datetime import date, datetime
 import re
@@ -201,16 +202,15 @@ async def get_book_summary_service(db: AsyncSession, book_id: int) -> dict:
     if not book.description:
         raise HTTPException(status_code=400, detail="Book has no description to summarize")
     
-    # Create AI prompt with book details
-    prompt = f"""You are a creative storyteller. Based on the following book details, write an engaging, story-like summary that captures the essence of the book in 2-3 paragraphs. Make it vivid and captivating, as if you're telling the story to a friend.
-
-Book Title: {book.name}
-Author: {book.author}
-Genre: {book.genre or 'Not specified'}
-Publication Date: {book.published_date or 'Not specified'}
-Description: {book.description}
-
-Write a compelling summary that makes someone want to read the book. Focus on the key themes, characters, and emotional journey. Keep it engaging and spoiler-free."""
+    prompt = build_summary_prompt(
+        {
+            "book_name": book.name,
+            "author": book.author,
+            "genre": book.genre or "Not specified",
+            "published_date": str(book.published_date or "Not specified"),
+            "description": book.description,
+        }
+    )
 
     try:
         # Generate summary using AI
@@ -243,16 +243,15 @@ async def get_book_summary_by_name_service(db: AsyncSession, name: str):
     if not book.description:
         raise HTTPException(status_code=400, detail="Book has no description to summarize")
     
-    # Create AI prompt with book details
-    prompt = f"""You are a creative storyteller. Based on the following book details, write an engaging, story-like summary that captures the essence of the book in 2-3 paragraphs. Make it vivid and captivating, as if you're telling the story to a friend.
-
-Book Title: {book.name}
-Author: {book.author}
-Genre: {book.genre or 'Not specified'}
-Publication Date: {book.published_date or 'Not specified'}
-Description: {book.description}
-
-Write a compelling summary that makes someone want to read the book. Focus on the key themes, characters, and emotional journey. Keep it engaging and spoiler-free."""
+    prompt = build_summary_prompt(
+        {
+            "book_name": book.name,
+            "author": book.author,
+            "genre": book.genre or "Not specified",
+            "published_date": str(book.published_date or "Not specified"),
+            "description": book.description,
+        }
+    )
 
     try:
         # Generate summary using AI

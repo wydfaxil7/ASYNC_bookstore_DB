@@ -9,6 +9,8 @@ class BookBase(BaseModel):
     genre: str | None = None
     published_date: date | None = None
     description: str | None = None
+    price: float = 0.0
+    stock: int = 10
 
 
 class BookCreate(BookBase):
@@ -95,11 +97,13 @@ class TokenData(BaseModel):
 class ChatMessage(BaseModel):
     role: str
     content: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+        )
 
 class ChatRequest(BaseModel):
     message: str = Field(
-        ...,
+        ..., #it means that this field is mandatory
         min_length=1,
         max_length=2000,
         description="User message sent to chatbot.",
@@ -124,3 +128,36 @@ class ChatResponse(BaseModel):
     lookup_mode: str | None = None
     model_config = ConfigDict(from_attributes=True)
  
+class CartItemCreate(BaseModel):
+    book_id: int = Field(
+        gt=0
+        )
+    quantity: int = Field(
+        default=1, 
+        ge=1, 
+        le=100
+        )
+
+class CartItemUpdate(BaseModel):
+    quantity: int = Field(
+        ge=1, 
+        le=100
+        )
+
+class CartItemRead(BaseModel):
+    id: int
+    user_id: int
+    book_id: int
+    quantity: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class CartListResponse(BaseModel):
+    data: List[CartItemRead]
+    total_items: int
+    total_price: float = 0.0
+    message: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)

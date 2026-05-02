@@ -1,15 +1,16 @@
 #main.py
 from pathlib import Path
-
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from app.routers import books, auth, chat
+
+from app.routers import books, auth, chat, carts
 from app.database import engine, Base
 
 app = FastAPI()
 app.include_router(auth.router)
 app.include_router(chat.router)
+app.include_router(carts.router)
 app.include_router(books.router)
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -92,6 +93,16 @@ async def frontend_books_ai_recommendations():
 @app.get("/ui/chatbot", include_in_schema=False)
 async def frontend_chatbot():
     return _ui_file("chatbot.html")
+
+
+@app.get("/ui/shop", include_in_schema=False)
+async def frontend_shop():
+    return _ui_file("shop.html")
+
+
+@app.get("/ui/product", include_in_schema=False)
+async def frontend_product():
+    return _ui_file("product.html")
 
 
 @app.get("/ui/profile", include_in_schema=False)
