@@ -6,11 +6,12 @@
   "reportCallIssue": "none",
   "reportAssignmentType": "none",
   "include": [
-    "backend"
+    "backend",
+    "groq_chatbot_lib"
   ],
   "exclude": [
-    "app",
     "frontend",
+    "groq_chatbot_lib/setup.py",
     "**/node_modules",
     "**/__pycache__",
     "**/.*",
@@ -21,7 +22,13 @@
     {
       "root": "backend",
       "extraPaths": [
-        "backend"
+        "groq_chatbot_lib"
+      ]
+    },
+    {
+      "root": "groq_chatbot_lib",
+      "extraPaths": [
+        "."
       ]
     }
   ]

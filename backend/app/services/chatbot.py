@@ -1,270 +1,300 @@
-import re
-from collections import defaultdict, deque
-from datetime import datetime, timezone
-from typing import Deque, Dict, List
+# app/services/chatbot.py
+
+import os
+from typing import Dict
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from groq_chatbot_lib import ChatbotClient
+from groq_chatbot_lib.tools import ToolDefinition, ToolParameter, ToolCall, ToolResult
+from groq_chatbot_lib.utils import sanitize_message
 
 from app.Repository import books as books_repo
 from app.schemas import ChatMessage, ChatRequest, ChatResponse
-from app.utils.groq_client import call_groq, GROQ_CHAT_MODEL
+from app.services.ai_prompts import (
+    CHAT_MEMORY_LIMIT,
+    GROQ_CHAT_MODEL,
+    GROQ_SYSTEM_PROMPT
+)
 
-CHAT_MEMORY_LIMIT = 10
-CHAT_MEMORY: Dict[int, Deque[ChatMessage]] = defaultdict(
-    lambda: deque(maxlen = CHAT_MEMORY_LIMIT)
+
+# ── PER-USER BOT INSTANCES ───────────────────────────────────────────────────
+
+_USER_BOTS: Dict[int, ChatbotClient] = {}
+_GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+
+def _get_or_create_bot(user_id: int) -> ChatbotClient:
+    if user_id not in _USER_BOTS:
+        if not _GROQ_API_KEY:
+            raise ValueError("GROQ_API_KEY not set")
+        bot = ChatbotClient(api_key=_GROQ_API_KEY, model=GROQ_CHAT_MODEL)
+        bot.set_system_prompt(GROQ_SYSTEM_PROMPT)
+        bot.set_memory_limit(CHAT_MEMORY_LIMIT * 2)
+        _USER_BOTS[user_id] = bot
+    return _USER_BOTS[user_id]
+
+
+# ── TOOL DEFINITIONS ─────────────────────────────────────────────────────────
+
+BOOKSTORE_TOOLS = [
+
+    ToolDefinition(
+        name="search_books",
+        description=(
+            "Search the bookstore catalog by title, author, genre, or keyword. "
+            "Use this when the user asks to find, browse, or look for books. "
+            "If no results are found, tell the user the book was not found. "
+            "Do NOT guess or invent book IDs. Only use IDs returned by this tool."
+        ),
+        parameters=[
+            ToolParameter(
+                name="query",
+                type="string",
+                description="The search term — a title, author name, genre, or topic. Can be empty if searching by genre only.",
+                required=False
+            ),
+            ToolParameter(
+                name="genre",
+                type="string",
+                description="Optional genre filter such as fantasy, sci-fi, romance, thriller",
+                required=False
+            )
+        ]
+    ),
+
+    ToolDefinition(
+        name="get_book_by_id",
+        description=(
+            "Fetch full details of one specific book using its ID number. "
+            "Use this when the user mentions a book ID or asks about a specific numbered book."
+        ),
+        parameters=[
+            ToolParameter(
+                name="book_id",
+                type="integer",
+                description="The numeric ID of the book to retrieve",
+                required=True
+            )
+        ]
+    ),
+
+    ToolDefinition(
+        name="count_books",
+        description=(
+            "Return the total number of books in the store. "
+            "Use this when the user asks how many books exist or the total count."
+        ),
+        parameters=[]
+    ),
+
+    ToolDefinition(
+        name="get_recommendations",
+        description=(
+            "Recommend books similar to a given title. "
+            "Use this when the user asks for recommendations or what to read next."
+        ),
+        parameters=[
+            ToolParameter(
+                name="title",
+                type="string",
+                description="The book title to base recommendations on",
+                required=True
+            )
+        ]
     )
 
-def normalize_message(message:str) -> str:
-    """
-    Cleans the input message by:
-       -Stripping leading and trailing whitespace
-       -accidental formatting issues
-    """
-    return " ".join(message.strip().split())
+]
 
-def get_recent_context(user_id: int, limit: int) -> List[ChatMessage]:
-    """
-    Returns only the last few turns for context
-    """
-    history = list(CHAT_MEMORY[user_id])
-    return history[-limit:]
 
-def remember_message(user_id: int, role: str, content: str) -> None:
-    """
-    Stores a message in the user's chat history
-    """
-    CHAT_MEMORY[user_id].append(
-        ChatMessage(
-            role = role,
-            content = content, 
-            created_at = datetime.now(timezone.utc)
-        )
-    )
+# ── EXECUTOR FACTORY ─────────────────────────────────────────────────────────
 
-BOOK_ID_PATTERN = re.compile(r"(?:book\s*id|id|#)\s(\d+)", re.IGNORECASE)
-
-def extract_requested_book_id(message: str) -> int | None:
+def make_executor(db: AsyncSession, total_books: int):
     """
-    Extract a book Id from a user message
+    Returns an async executor function with db and total_books baked in.
+    This is a closure — inner function remembers outer variables.
     """
 
-    match = BOOK_ID_PATTERN.search(message)
-    if match: 
-        return int(match.group(1))
+    async def executor(tool_call: ToolCall) -> ToolResult:
 
-    if message.strip().isdigit():
-        return int(message.strip())
+        name = tool_call.name
+        args = tool_call.arguments
 
-    return None
+        if name == "search_books":
+            query = args.get("query", "")
+            genre = args.get("genre", None)
 
-def is_count_question(message: str) -> bool:
-    """
-    Detect questions asking for the total number of books.
-    """
-    normalized = normalize_message(message).lower()
-    patterns = [
-        "how many books",
-        "how many do you have",
-        "how many books do you have",
-        "total books",
-        "book count",
-        "exact count",
-        "exact figure",
-        "number of books",
-        "how many items",
+            try:
+                books, total = await books_repo.search_book(
+                    db=db,
+                    q=query,
+                    genre=genre,
+                    limit=5,
+                    offset=0
+                )
+
+                if not books:
+                    return ToolResult(
+                        tool_call_id=tool_call.id,
+                        content=f"No books found matching '{query}'."
+                    )
+
+                lines = [f"Found {total} book(s) matching '{query}':\n"]
+                for i, book in enumerate(books, 1):
+                    lines.append(
+                        f"{i}. \"{book.name}\" by {book.author} "
+                        f"(Genre: {book.genre or 'General'}, ID: {book.id})"
+                    )
+
+                return ToolResult(
+                    tool_call_id=tool_call.id,
+                    content="\n".join(lines)
+                )
+
+            except Exception as e:
+                return ToolResult(
+                    tool_call_id=tool_call.id,
+                    content=f"Search failed: {str(e)}",
+                    is_error=True
+                )
+
+        elif name == "get_book_by_id":
+            book_id = args.get("book_id")
+
+            if book_id is None:
+                return ToolResult(
+                    tool_call_id=tool_call.id,
+                    content="No book ID was provided.",
+                    is_error=True
+                )
+
+            try:
+                book = await books_repo.get_book(db, book_id)
+
+                if not book:
+                    return ToolResult(
+                        tool_call_id=tool_call.id,
+                        content=f"No book found with ID {book_id}."
+                    )
+
+                published = str(book.published_date) if book.published_date else "Unknown"
+                description = book.description or "No description available."
+
+                return ToolResult(
+                    tool_call_id=tool_call.id,
+                    content=(
+                        f"Book ID {book.id}: \"{book.name}\" by {book.author}\n"
+                        f"Genre: {book.genre or 'General'} | Published: {published}\n"
+                        f"{description}"
+                    )
+                )
+
+            except Exception as e:
+                return ToolResult(
+                    tool_call_id=tool_call.id,
+                    content=f"Book lookup failed: {str(e)}",
+                    is_error=True
+                )
+
+        elif name == "count_books":
+            return ToolResult(
+                tool_call_id=tool_call.id,
+                content=f"The bookstore currently has {total_books} books in its catalog."
+            )
+
+        elif name == "get_recommendations":
+            title = args.get("title", "")
+
+            try:
+                books, total = await books_repo.get_books_with_filters(
+                    db=db,
+                    limit=5,
+                    offset=0,
+                    author=None,
+                    genre=None
+                )
+
+                books = [b for b in books if b.name.lower() != title.lower()]
+
+                if not books:
+                    return ToolResult(
+                        tool_call_id=tool_call.id,
+                        content=f"No recommendations found similar to '{title}'."
+                    )
+
+                lines = [f"Books you might enjoy if you liked '{title}':\n"]
+                for i, book in enumerate(books, 1):
+                    lines.append(
+                        f"{i}. \"{book.name}\" by {book.author} "
+                        f"(Genre: {book.genre or 'General'}, ID: {book.id})"
+                    )
+
+                return ToolResult(
+                    tool_call_id=tool_call.id,
+                    content="\n".join(lines)
+                )
+
+            except Exception as e:
+                return ToolResult(
+                    tool_call_id=tool_call.id,
+                    content=f"Recommendations failed: {str(e)}",
+                    is_error=True
+                )
+
+        else:
+            return ToolResult(
+                tool_call_id=tool_call.id,
+                content=f"Unknown tool '{name}' was requested.",
+                is_error=True
+            )
+
+    return executor
+
+
+# ── HISTORY CONVERTER ────────────────────────────────────────────────────────
+
+def _bot_history_to_chat_messages(bot: ChatbotClient, limit: int) -> list[ChatMessage]:
+    recent = bot.get_recent_history(limit)
+    return [
+        ChatMessage(role=m["role"], content=m["content"])
+        for m in recent
+        if m["role"] in ("user", "assistant")
     ]
-    return any(pattern in normalized for pattern in patterns)
-
-def format_catalog_context(matched_books) -> str:
-    """
-    Convert matched books into prompt-safe text block
-    """
-    if not matched_books:
-        return "No matching books found in the current catalog."
-
-    lines = []
-    for book in matched_books:
-        lines.append(
-            f"#{book.id} | {book.name} | {book.author} | "
-            f"genre={book.genre or '—'} | "
-            f"published={book.published_date or '—'} | "
-            f"description={book.description or 'No description available.'}"
-        )
-    
-    return "\n".join(lines)
 
 
-async def fetch_catalog_context(db: AsyncSession, user_message: str, limit: int =5) -> List[dict]:
-    """
-    Fetch a small set of relevant books from the bookstore DB to ground.
-    """
-    books, _total = await books_repo.search_book(
-        db = db,
-        q = user_message,
-        genre = None,
-        limit = limit,
-        offset = 0
-    )
-
-    context_rows: List[dict] = []
-    for book in books:
-        context_rows.append(
-            {
-                "id": book.id,
-                "name": book.name,
-                "author": book.author,
-                "genre": book.genre,
-                "published_date": str(book.published_date) if book.published_date else None,
-                "description": book.description
-            }
-        )
-
-    return context_rows
-
-def build_chat_prompt(
-        user_message: str,
-        context: List[ChatMessage],
-        total_books: int,
-        catalog_context: str) -> str:
-    """
-    Builds a  hybrid prompt for the AI model by combining:
-        -System instructions
-        -Recent context
-        -Current user message
-        -grounded on store catalog when available
-    """
-    # build conversation history block
-    history_block = ""
-    for msg in context: 
-        role_label = "User" if msg.role == "user" else "Assistant"
-        history_block += f"{role_label}: {msg.content}\n"
-
-
-    # Combining everything into one prompt
-    prompt = f"""You are BookGPT, the bookstore assistant.
-
-You have two responsibilities:
-1. Use STORE FACTS when the user asks about inventory, availability, authors, titles, genres, book IDs, or how many books exist.
-2. Answer GENERAL QUESTIONS normally when the question is not about current store data.
-
-Response policy:
-- If the user asks for exact store facts, use the database facts only.
-- If a book is not in the current catalog context, say it is not found in the current store catalog.
-- If the user uses a typo or paraphrase, infer the intended book or author from the closest catalog match.
-- Never claim a book exists in the store unless it appears in catalog context.
-- If the question is general knowledge, answer naturally and helpfully.
-- If the question is ambiguous, ask one short clarifying question.
-
-Total books in catalog:
-{total_books}
-
-CATALOG CONTEXT:
-{catalog_context}
-
-Previous conversation:
-{history_block}
-
-User: {user_message}
-Assistant:"""
-        
-    return prompt
+# ── MAIN CHAT HANDLER ────────────────────────────────────────────────────────
 
 async def build_chat_turn(
         db: AsyncSession,
-        current_user: dict, 
-        payload: ChatRequest
+        current_user: dict,
+        payload: ChatRequest,
 ) -> ChatResponse:
-    """
-    Builds a chat turn with both conversation memeory
-    grounded DB context
-    fuzzy catalog search
-    groq fallback for general questions
-    """
+
     user_id = current_user["user_id"]
-    user_message = normalize_message(payload.message)
-    context = get_recent_context(user_id, payload.history_limit)
 
-    remember_message(user_id, "user", user_message)
+    try:
+        user_message = sanitize_message(payload.message)
+    except ValueError:
+        user_message = payload.message.strip()
 
+    bot = _get_or_create_bot(user_id)
     total_books = await books_repo.get_books_count(db)
+    executor = make_executor(db, total_books)
 
-    if is_count_question(user_message):
-        assistant_reply = f"We currently have {total_books} books in the store catalog."
-        cleaned_reply = assistant_reply.strip()
-        remember_message(user_id, "assistant", cleaned_reply)
+    reply = await bot.ask_with_tools(
+        user_message=user_message,
+        tools=BOOKSTORE_TOOLS,
+        executor=executor
+    )
 
-        return ChatResponse(
-            user_id=user_id,
-            message=user_message,
-            reply=cleaned_reply,
-            context_used=context,
-            message_count=len(context),
-            store_book_count=total_books,
-            matched_books_count=0,
-            lookup_mode="store_count",
-        )
-
-    requested_book_id = extract_requested_book_id(user_message)
-    if requested_book_id is not None:
-        book = await books_repo.get_book(db, requested_book_id)
-
-        if book:
-            assistant_reply = (
-                f"Book #{book.id}: {book.name} by {book.author}. "
-                f"Genre: {book.genre or '—'}. "
-                f"Published: {book.published_date or '—'}. "
-                f"Description: {book.description or 'No description available.'}"
-            )
-            lookup_mode = "exact_book_id"
-            matched_books_count = 1
-        else:
-            assistant_reply = f"I could not find a book with ID {requested_book_id} in the current catalog."
-            lookup_mode = "book_id_not_found"
-            matched_books_count = 0
-
-        cleaned_reply = assistant_reply.strip()
-        remember_message(user_id, "assistant", cleaned_reply)
-
-        return ChatResponse(
-            user_id=user_id,
-            message=user_message,
-            reply=cleaned_reply,
-            context_used=context,
-            message_count=len(context),
-            store_book_count=total_books,
-            matched_books_count=matched_books_count,
-            lookup_mode=lookup_mode,
-        )
-
-    matched_books = await books_repo.search_books_for_chat(db, user_message, limit=5)
-    catalog_context = format_catalog_context(matched_books)
-    prompt = build_chat_prompt(user_message, context, total_books, catalog_context)
-
-    assistant_reply = await call_groq(prompt, model=GROQ_CHAT_MODEL)
-    cleaned_reply = assistant_reply.strip()
-    remember_message(user_id, "assistant", cleaned_reply)
+    context_used = _bot_history_to_chat_messages(bot, payload.history_limit)
 
     return ChatResponse(
         user_id=user_id,
         message=user_message,
-        reply=cleaned_reply,
-        context_used=context,
-        message_count=len(context),
+        reply=reply,
+        context_used=context_used,
+        message_count=bot.count_turns(),
         store_book_count=total_books,
-        matched_books_count=len(matched_books),
-        lookup_mode="catalog_search" if matched_books else "general_answer",
+        matched_books_count=0,
+        lookup_mode="tool_calling"
     )
-    
-    # catalog_context = await fetch_catalog_context(db, user_message, limit = 5)
-    # prompt = build_chat_prompt(user_message, context, catalog_context)
-    
-    # assistant_reply = await call_groq(prompt, model=GROQ_CHAT_MODEL)
-    # cleaned_reply = assistant_reply.strip()
-    # remember_message(user_id, "assistant", cleaned_reply)
-
-    # return ChatResponse(
-    #     user_id = user_id,
-    #     message = user_message,
-    #     reply = cleaned_reply,
-    #     context_used = context,
-    #     message_count = len(context)
-    # )
