@@ -1,194 +1,404 @@
-# Backend
+# 📚 BOOKSTORE_DB — Async Bookstore Platform with AI Agent & Frontend
 
-FastAPI backend for BOOKSTORE_DB. The app is asynchronous end to end and uses SQLAlchemy, PostgreSQL, JWT auth, a cart workflow, AI-powered book endpoints, and an authenticated chatbot grounded on the live catalog.
+A production-grade async bookstore platform built with **FastAPI**, **PostgreSQL**, **Groq AI (Llama 3)**, and a fully custom **tool-calling AI agent engine** — now with a complete static frontend UI, Dockerized deployment, and a reusable local chatbot library.
 
-## Features
+---
 
-- ⚡ Fully asynchronous FastAPI endpoints
-- 🗄️ Async SQLAlchemy with PostgreSQL
-- 🧱 Clean architecture (Router → Service → Repository)
-- 📚 Full CRUD operations on books
-- 📄 Pagination with total count (`limit`, `offset`)
-- 🔍 Dynamic filtering by author, genre, and published date range
-- 🔀 Advanced sorting by name, author, published_date, or genre (asc/desc)
-- 📦 Bulk book creation endpoint
-- 🛡️ JWT authentication & admin-only protections
-- 🤖 AI-Powered Features: search, recommendations, summaries, and BookGPT chat
-- 🛒 Cart management with inventory-aware stock reservation
-- 🧠 Pydantic v2 schemas
-- 🐳 Fully Dockerized (API + PostgreSQL)
+## 🗂️ Project Structure
 
-## What Lives Here
-
-- `app/main.py` wires routers, static UI mounting, and startup table creation.
-- `app/routers/` exposes auth, books, carts, and chat endpoints.
-- `app/services/` contains auth logic, book operations, AI helpers, and chatbot orchestration.
-- `app/Repository/` contains the database access layer.
-- `app/utils/groq_client.py` bridges the backend to the local Groq helper package.
-- `../groq_chatbot_lib/` is a local package dependency that ships with this repository.
-
-## Run Locally
-
-```bash
-cd backend
-poetry install
-poetry run uvicorn app.main:app --reload
+```
+BOOKSTORE_DB/
+├── backend/
+│   ├── app/
+│   │   ├── Repository/
+│   │   │   ├── books.py            # DB queries — CRUD, search, filters, keywords
+│   │   │   └── users.py            # DB queries — users
+│   │   ├── dependencies/
+│   │   │   ├── auth_dependencies.py  # require_admin, get_current_user guards
+│   │   │   └── security.py           # Bearer scheme, token extraction
+│   │   ├── routers/
+│   │   │   ├── auth.py             # /auth/register, /auth/login, /auth/me
+│   │   │   ├── books.py            # /books CRUD + AI search/recommend/summary
+│   │   │   └── chat.py             # /chat — BookGPT tool-calling endpoint
+│   │   ├── services/
+│   │   │   ├── ai.py               # AI search, recommendations, summary orchestration
+│   │   │   ├── ai_prompts.py       # Structured prompt builders for all AI features
+│   │   │   ├── auth.py             # Auth helpers
+│   │   │   ├── auth_service.py     # Registration, login, token logic
+│   │   │   ├── books.py            # Book business logic
+│   │   │   └── chatbot.py          # BookGPT: tool definitions, executor, per-user bots
+│   │   ├── utils/
+│   │   │   ├── groq_client.py      # Bridge to groq_chatbot_lib
+│   │   │   └── wrappers.py         # Centralized error handling wrappers
+│   │   ├── database.py             # Async engine and session factory
+│   │   ├── main.py                 # App init, router registration, static UI mounting
+│   │   ├── models.py               # SQLAlchemy models — Book, User
+│   │   └── schemas.py              # Pydantic v2 request/response schemas
+│   ├── tests/
+│   │   ├── test_auths.py
+│   │   └── test_books.py
+│   ├── pyproject.toml
+│   ├── requirements.txt
+│   └── README.md
+├── frontend/
+│   └── ui/
+│       ├── assets/
+│       ├── css/
+│       ├── js/
+│       └── pages/
+├── groq_chatbot_lib/               # Local reusable Python AI library
+│   ├── groq_chatbot_lib/
+│   │   ├── __init__.py             # Public exports
+│   │   ├── client.py               # ChatbotClient — Groups 1, 2, 3
+│   │   ├── tools.py                # Tool-calling engine — ToolDefinition, async loop
+│   │   ├── extractor.py            # JSON extraction engine
+│   │   └── utils.py                # Standalone helpers — Group 4
+│   ├── tests/
+│   ├── pyproject.toml
+│   └── README.md
+├── bookstore_backup.sql
+├── docker-compose.yml
+├── Dockerfile
+└── README.md
 ```
 
-The application creates tables on startup through `app.main`, so there is no separate bootstrap script to run.
+---
 
-## Environment Variables
+## 🚀 Features
 
-The backend reads environment values from `.env`.
+### ⚡ Core Backend
+- Fully asynchronous end-to-end (FastAPI + Async SQLAlchemy + asyncpg)
+- Clean **Router → Service → Repository** architecture
+- JWT authentication with access and refresh tokens
+- Role-based access control — admin-only write routes
+- Full CRUD on books with bulk creation endpoint
+- Pagination with total count (limit, offset)
+- Dynamic filtering by author, genre, and date range (year / year-month / full date)
+- Advanced sorting by name, author, published_date, or genre (asc/desc)
+- Inventory-aware cart — stock reserved on add, released on delete/clear
+- Pydantic v2 schemas (model_dump, from_attributes)
+- Centralized error handling via service wrappers
+- Auto-generated Swagger UI and ReDoc docs
 
-Required for a working app:
+### 🤖 AI-Powered Features
+- 🔍 **AI Book Search** — natural language query → structured filters → DB lookup → keyword fallback
+- 💡 **AI Recommendations** — multi-strategy fallback (primary genre → author → keywords → secondary genres)
+- 📖 **AI Summaries** — story-style book summaries by ID or name via prompt engineering
+- 💬 **BookGPT Chatbot** — DB-grounded tool-calling AI agent (see below)
 
-- `DATABASE_URL`
-- `GROQ_API_KEY`
-- `GROQ_SYSTEM_PROMPT`
-- `BOOK_SEARCH_PROMPT_TEMPLATE`
-- `BOOK_RECOMMENDATION_PROMPT_TEMPLATE`
-- `BOOK_CHAT_PROMPT_TEMPLATE`
-- `BOOK_SUMMARY_PROMPT_TEMPLATE`
-- `SECRET_KEY`
+### 💬 BookGPT — Tool-Calling AI Agent
 
-Common optional settings:
+The chat endpoint uses a **custom tool-calling loop** built from scratch inside `groq_chatbot_lib` — no LangChain:
 
-- `GROQ_CHAT_MODEL` defaults to `llama-3.1-8b-instant`
-- `GROQ_SEARCH_MODEL` defaults to `GROQ_CHAT_MODEL`
-- `GROQ_REQUEST_TIMEOUT_SECONDS` defaults to `10`
-- `AI_SEARCH_TIMEOUT_SECONDS` defaults to `5`
-- `AI_RECOMMENDATION_TIMEOUT_SECONDS` defaults to `5`
-- `AI_SUMMARY_TIMEOUT_SECONDS` defaults to `10`
-- `CHAT_MEMORY_LIMIT` defaults to `10`
-- `CHAT_CATALOG_SEARCH_LIMIT` defaults to `5`
-- `ACCESS_TOKEN_EXPIRE_MINUTES` defaults to `60`
-- `REFRESH_TOKEN_EXPIRE_DAYS` defaults to `7`
-- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` are used by Docker Compose defaults
+1. 📨 User message + conversation history sent to Groq with four tool definitions
+2. 🧠 LLM decides which tool(s) to call
+3. 🗄️ Backend executes the tool against live PostgreSQL database
+4. 📋 Tool results appended to history and sent back to the model
+5. ✅ Model generates a final grounded reply
 
-Prompt templates support `[[placeholder]]` replacements at runtime. Keep those tokens in the template text when you want the backend to inject values such as query, title, book metadata, or conversation history.
+**Available tools:**
+| Tool | Description |
+|---|---|
+| `search_books` | Full-text search by title, author, genre, or keyword |
+| `get_book_by_id` | Fetch exact book by numeric ID |
+| `count_books` | Return total catalog size |
+| `get_recommendations` | Surface similar books |
 
-## API Surface
+Per-user bot instances maintained in memory with configurable memory limits — conversation history persists across turns within a session.
 
-Auth:
-
-- `POST /auth/register`
-- `POST /auth/login`
-- `GET /auth/me`
-
-Books:
-
-- `GET /books`
-- `POST /books`
-- `POST /books/bulk`
-- `GET /books/{book_id}`
-- `PUT /books/{book_id}`
-- `DELETE /books/{book_id}`
-- `GET /books/search`
-- `GET /books/ai-search`
-- `GET /books/recommendations`
-- `GET /books/summary/search`
-
-Chat:
-
-- `POST /chat`
-
-Cart:
-
-- `GET /carts`
-- `POST /carts/add`
-- `PUT /carts/update/{item_id}`
-- `DELETE /carts/delete/{item_id}`
-- `DELETE /carts/clear`
-
-The chatbot endpoint is authenticated and uses the local `groq_chatbot_lib` tool-calling client to resolve catalog lookups, book-by-ID requests, count questions, and recommendations before returning the final reply.
-
-## BookGPT Chat
-
-`POST /chat` accepts a user message plus an optional history window, then routes requests through lookup modes before general generation:
-
-- `store_count`: answers exact count questions from the database
-- `exact_book_id`: resolves direct ID queries such as "book id 3"
-- `catalog_search`: fuzzy-matches titles/authors for typo-tolerant grounding
-
-If no catalog match is found, it falls back to `general_answer` while preserving conversation context.
-
-Request body example:
-
+**Request example:**
 ```json
 {
-  "message": "do we have the boyfriend?",
+  "message": "do you have any books by Rowling?",
   "history_limit": 10
 }
 ```
 
-Response highlights:
+**Response fields:**
+- `reply` — assistant response text
+- `lookup_mode` — which logic path answered (search / exact_book_id / store_count / general_answer)
+- `matched_books_count` — number of catalog matches used
+- `store_book_count` — returned for count-oriented questions
 
-- `reply`: assistant response text
-- `lookup_mode`: which logic path answered
-- `matched_books_count`: number of catalog matches used
-- `store_book_count`: returned for count-oriented questions
+### 🖥️ Frontend UI
+Static HTML/CSS/JS pages served by FastAPI under `/ui`:
 
-## Cart And Inventory
+| Route | Page |
+|---|---|
+| `/ui` | Landing page |
+| `/ui/login` | Login |
+| `/ui/register` | Register |
+| `/ui/dashboard` | User dashboard |
+| `/ui/shop` | Browse catalog |
+| `/ui/product?id={id}` | Book detail |
+| `/ui/chatbot` | BookGPT chat UI |
+| `/ui/books/ai-search` | AI search interface |
+| `/ui/books/ai-summary` | Summary generator |
+| `/ui/books/ai-recommendations` | Recommendations UI |
+| `/ui/books/write` | Admin — create book |
+| `/ui/books/edit` | Admin — edit book |
 
-- Cart operations are user-scoped via JWT auth.
-- Cart totals include `total_items` and `total_price`.
-- Book stock is adjusted on add/update/delete/clear cart operations.
+### 🐳 Docker
+- Fully Dockerized (API + PostgreSQL)
+- FastAPI → host port `8000`
+- PostgreSQL → host port `5433`
 
-## AI Endpoints
+---
 
-- `GET /books/ai-search` performs natural-language catalog search.
-- `GET /books/recommendations` returns catalog-based recommendations for a title.
-- `GET /books/summary/search` returns a generated summary by book ID or book name.
-- `POST /chat` returns a DB-grounded conversation reply with fields such as `lookup_mode`, `matched_books_count`, and `store_book_count`.
+## 🤖 groq_chatbot_lib
 
-## Filtering And Pagination
+A general-purpose, reusable Python library for building Groq-powered AI chatbots and agents. Used internally by the backend but designed for any Python project.
 
-Filter by genre:
-
+### 📦 Install
 ```bash
-/books?genre=Fantasy
+pip install git+https://github.com/your-username/groq_chatbot_lib.git
 ```
 
-Filter by date range (supports year, year-month, or full date):
+### 🔧 Group 1 — Core Chat
+```python
+from groq_chatbot_lib import ChatbotClient
+
+bot = ChatbotClient(api_key="...", model="llama-3.3-70b-versatile")
+bot.set_system_prompt("You are a helpful assistant.")
+
+reply = bot.ask("Hello!")           # stateful — adds to history
+reply = bot.quick_ask("One-off")    # no memory effect
+history = bot.get_history()
+bot.reset()
+```
+
+### 🧠 Group 2 — Structured Output
+```python
+# Extract JSON dict
+result = bot.ask_for_json("Return genre and mood as JSON")
+# → {"genre": "fantasy", "mood": "dark"}
+
+# Extract list of JSON objects
+books = bot.ask_for_json_list("Return 3 books with title and author")
+# → [{"title": "...", "author": "..."}, ...]
+
+# Extract and validate required keys
+data = bot.ask_with_schema(prompt, required_keys=["intent", "genre", "author"])
+# → returns dict if all keys present, else None
+```
+
+### 🗂️ Group 3 — Memory & Context Control
+```python
+bot.set_memory_limit(10)            # auto-trim after every ask()
+bot.inject_context("system", "User is browsing sci-fi.")
+bot.trim_history(keep_last=4)
+bot.get_recent_history(5)
+bot.count_turns()
+bot.has_system_prompt()
+```
+
+### 🛠️ Group 4 — Tool Calling (async)
+```python
+reply = await bot.ask_with_tools(
+    user_message="Find books by Rowling",
+    tools=BOOKSTORE_TOOLS,          # list[ToolDefinition]
+    executor=my_async_executor      # async fn(ToolCall) -> ToolResult
+)
+```
+
+**Defining tools:**
+```python
+from groq_chatbot_lib.tools import ToolDefinition, ToolParameter
+
+search_tool = ToolDefinition(
+    name="search_books",
+    description="Search catalog by title, author, or genre.",
+    parameters=[
+        ToolParameter(name="query", type="string", description="Search term", required=False),
+        ToolParameter(name="genre", type="string", description="Genre filter", required=False),
+    ]
+)
+```
+
+### 🧰 Standalone Utilities
+```python
+from groq_chatbot_lib import (
+    format_history, history_to_text,
+    count_tokens_estimate, is_within_token_limit, estimate_history_tokens,
+    split_text_into_chunks,
+    sanitize_message,
+    extract_json, extract_json_list, validate_schema
+)
+```
+
+---
+
+## 📌 API Endpoints
+
+### 🔐 Auth
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/auth/register` | Register new user |
+| POST | `/auth/login` | Login and get tokens |
+| GET | `/auth/me` | Get current user |
+
+### 📚 Books
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/books` | Create a book (admin only) |
+| POST | `/books/bulk` | Bulk create books |
+| GET | `/books` | Get books (filtering, sorting, pagination) |
+| GET | `/books/{id}` | Get single book |
+| PUT | `/books/{id}` | Update book (admin only) |
+| DELETE | `/books/{id}` | Delete book (admin only) |
+
+### 🤖 AI Features
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/books/ai-search` | Natural language book search |
+| GET | `/books/recommendations` | AI-powered recommendations |
+| GET | `/books/summary/search` | Story-style book summary |
+| POST | `/chat` | BookGPT tool-calling chatbot |
+
+### 🛒 Cart
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/carts/add` | Add book to cart |
+| GET | `/carts` | Get current user's cart |
+| PUT | `/carts/update/{id}` | Update item quantity |
+| DELETE | `/carts/delete/{id}` | Remove item |
+| DELETE | `/carts/clear` | Clear entire cart |
+
+---
+
+## 🔍 Filtering, Sorting & Pagination
 
 ```bash
+# Pagination
+/books?limit=10&offset=0
+
+# Filter by author, genre
+/books?author=Rowling&genre=Fantasy
+
+# Filter by date range (year / year-month / full date)
 /books?start_date=2000&end_date=2020
 /books?start_date=2000-01&end_date=2020-12
 /books?start_date=2000-01-01&end_date=2020-12-31
-```
 
-Sorting:
-
-```bash
+# Sorting
 /books?sort_by=name&order=asc
 /books?sort_by=published_date&order=desc
-```
 
-Combined:
-
-```bash
+# Combined
 /books?author=Rowling&genre=Fantasy&start_date=1997&end_date=2007&sort_by=name&order=asc&limit=5&offset=0
 ```
 
-## Docker
+---
 
+## 🛠️ Getting Started
+
+### 📥 Clone Repository
+```bash
+git clone https://github.com/your-username/BOOKSTORE_DB.git
+cd BOOKSTORE_DB
+```
+
+### 📦 Install Dependencies
+```bash
+cd backend
+poetry install
+poetry shell
+```
+
+### ⚙️ Environment Variables
+
+Create `.env` in `backend/`:
+
+```env
+# Required
+DATABASE_URL=postgresql+asyncpg://user:password@localhost:5433/bookstore
+GROQ_API_KEY=your_groq_api_key
+SECRET_KEY=your_jwt_secret
+
+# Models
+GROQ_CHAT_MODEL=llama-3.1-8b-instant
+GROQ_SEARCH_MODEL=llama-3.1-8b-instant
+GROQ_REQUEST_TIMEOUT_SECONDS=10
+
+# AI timeouts
+AI_SEARCH_TIMEOUT_SECONDS=5
+AI_RECOMMENDATION_TIMEOUT_SECONDS=5
+AI_SUMMARY_TIMEOUT_SECONDS=10
+
+# Chat
+CHAT_MEMORY_LIMIT=10
+CHAT_CATALOG_SEARCH_LIMIT=5
+
+# Auth
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+REFRESH_TOKEN_EXPIRE_DAYS=7
+
+# Prompt templates — use [[placeholder]] tokens to avoid Docker interpolation
+GROQ_SYSTEM_PROMPT=...
+BOOK_SEARCH_PROMPT_TEMPLATE=...
+BOOK_RECOMMENDATION_PROMPT_TEMPLATE=...
+BOOK_CHAT_PROMPT_TEMPLATE=...
+BOOK_SUMMARY_PROMPT_TEMPLATE=...
+```
+
+> ⚠️ Use `localhost:5433` for local runs. For Docker Compose use `postgres:5432`.
+
+### 🚀 Run Locally
+```bash
+poetry run uvicorn app.main:app --reload
+```
+
+Tables are created automatically on startup — no migration script needed.
+
+### 🐳 Run with Docker
 ```bash
 docker compose up --build
 ```
 
-In Docker Compose, PostgreSQL is exposed on host port `5433` and the API on host port `8000`.
+---
 
-If you run the backend locally against the Compose database, use a `DATABASE_URL` that targets `localhost:5433`. Inside Docker, the database host should be `postgres:5432`.
+## 📘 API Documentation
+- 📄 Swagger UI → `http://127.0.0.1:8000/docs`
+- 📕 ReDoc → `http://127.0.0.1:8000/redoc`
 
-## Tests
+---
 
+## 🧪 Tests
 ```bash
-poetry run pytest
+cd backend
+poetry run pytest -v
 ```
 
-## Notes
+---
 
-- The project keeps a local helper package in `../groq_chatbot_lib/`; do not treat it as an external pip-only dependency.
-- The workspace-level `pyrightconfig.json` is already configured for the backend and the local helper package.
-- The SQL backup file at the repository root is `../bookstore_backup.sql`.
+## 📦 Tech Stack
+
+| Tech | Usage |
+|---|---|
+| **FastAPI** | Async web framework |
+| **Async SQLAlchemy** | Async ORM |
+| **PostgreSQL** | Primary database |
+| **Groq AI (Llama 3)** | LLM for all AI features |
+| **Pydantic v2** | Validation & serialization |
+| **Poetry** | Dependency management |
+| **pytest + httpx** | Testing |
+| **Docker + Compose** | Containerization |
+| **JWT (python-jose)** | Authentication |
+
+---
+
+## 🔮 Future Improvements
+- 🔍 Advanced full-text search with trigram indexing
+- 🧾 Order and checkout persistence (orders, order-items, payment states)
+- 🧠 Recommendation personalization using user/cart history
+- ⚙️ CI/CD pipeline with migration checks and integration tests
+- 📈 Monitoring and structured logging dashboards
+- 🌐 RAG pipeline with vector database for smarter catalog search
+
+---
+
+## ⭐ Final Note
+
+This project demonstrates a production-ready backend structure using modern async Python, enhanced with a **custom-built AI agent tooling layer** for intelligent book discovery, grounded conversation, and content generation — built without relying on frameworks like LangChain.
+
+🚀 Built with FastAPI & Groq AI
