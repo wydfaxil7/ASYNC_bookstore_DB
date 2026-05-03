@@ -1,0 +1,7 @@
+{
+  "extraPaths": [
+    "../groq_chatbot_lib"
+  ],
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none"
+}

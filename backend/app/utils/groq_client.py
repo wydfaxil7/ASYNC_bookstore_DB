@@ -1,21 +1,18 @@
 #app/utils/groq_client.py
 import os
 import json
-import re
-from groq import Groq
 import asyncio
 from typing import Dict, Any, Optional
 
 from groq_chatbot_lib import ChatbotClient
-from groq_chatbot_lib.extractor import extract_json, extract_json_list
+from groq_chatbot_lib.extractor import extract_json, extract_json_list, validate_schema
 
 from app.services.ai_prompts import (
-    GROQ_CHAT_MODEL,
     GROQ_DEFAULT_MODEL,
     GROQ_REQUEST_TIMEOUT_SECONDS,
     GROQ_SEARCH_MODEL,
-    GROQ_SYSTEM_PROMPT,
 )
+
 
 def get_groq_client(model: str = GROQ_DEFAULT_MODEL) -> ChatbotClient:
     """
@@ -26,9 +23,10 @@ def get_groq_client(model: str = GROQ_DEFAULT_MODEL) -> ChatbotClient:
         raise ValueError("GROQ_API_KEY environment variable is not set")
     return ChatbotClient(api_key=api_key, model=model)
 
+
 async def call_groq(
-        prompt: str, 
-        timeout: int = GROQ_REQUEST_TIMEOUT_SECONDS, 
+        prompt: str,
+        timeout: int = GROQ_REQUEST_TIMEOUT_SECONDS,
         model: str = GROQ_DEFAULT_MODEL,
         system_prompt: str = ""
         ) -> str:
@@ -64,6 +62,7 @@ async def call_groq(
             )
         raise
 
+
 def extract_json_from_response(response_text: str) -> Optional[Dict[str, Any]]:
     """
     Safely extract and validate JSON from AI response.
@@ -75,8 +74,7 @@ def extract_json_from_response(response_text: str) -> Optional[Dict[str, Any]]:
     Returns:
         Parsed JSON dict or None if invalid
     """
-    from groq_chatbot_lib.extractor import extract_json_list
-    return extract_json_list(response_text)
+    return extract_json(response_text)
 
 
 def extract_json_list_from_response(response_text: str) -> list[Dict[str, Any]]:
@@ -89,8 +87,8 @@ def extract_json_list_from_response(response_text: str) -> list[Dict[str, Any]]:
     Returns:
         List of parsed JSON objects, empty list if none found
     """
-    from groq_chatbot_lib.extractor import extract_json_list
     return extract_json_list(response_text)
+
 
 async def call_groq_with_json_response(
     prompt: str,
@@ -114,7 +112,6 @@ async def call_groq_with_json_response(
             asyncio.to_thread(lambda: client.quick_ask(prompt)),
             timeout=timeout
         )
-        from groq_chatbot_lib.extractor import extract_json, validate_schema
         json_data = extract_json(response)
 
         if not json_data or not isinstance(json_data,dict):
