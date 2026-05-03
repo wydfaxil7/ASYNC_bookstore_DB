@@ -47,9 +47,40 @@ BOOKSTORE_DB/
 ├── frontend/
 │   └── ui/
 │       ├── assets/
+│       │   ├── ai-books.svg
+│       │   └── bookstore-hero.svg
 │       ├── css/
+│       │   └── styles.css
 │       ├── js/
+│       │   ├── auth.js
+│       │   ├── cart-ui.js
+│       │   ├── chatbot.js
+│       │   ├── common.js
+│       │   ├── dashboard.js
+│       │   ├── profile.js
+│       │   ├── books-write.js
+│       │   ├── books-view.js
+│       │   ├── books-search.js
+│       │   ├── books-ai-search.js
+│       │   ├── books-ai-summary.js
+│       │   ├── books-ai-recommendations.js
+│       │   ├── product.js
+│       │   └── shop.js
 │       └── pages/
+│           ├── product.html
+│           ├── shop.html
+│           ├── chatbot.html
+│           ├── landing.html
+│           ├── login.html
+│           ├── register.html
+│           ├── dashboard.html
+│           ├── profile.html
+│           ├── books-write.html
+│           ├── books-view.html
+│           ├── books-search.html
+│           ├── books-ai-search.html
+│           ├── books-ai-summary.html
+│           └── books-ai-recommendations.html
 ├── groq_chatbot_lib/
 ├── bookstore_backup.sql
 ├── docker-compose.yml
